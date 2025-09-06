@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
-import Header from "@/components/site/Header";
-import Footer from "@/components/site/Footer";
+import Header from '@/app/components/site/Header';
+import Footer from '@/app/components/site/Footer';
 import "./globals.css";
 
 const inter = Inter({
