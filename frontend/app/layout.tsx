@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css"; // Importa nossos estilos do Tailwind
+import "./globals.css"; // Vamos criar este arquivo a seguir
 
 export const metadata: Metadata = {
   title: "Apostolado Cardeal Newman",
@@ -14,12 +14,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <header className="border-b">
-          <div className="container mx-auto flex h-16 items-center justify-between">
+        <header className="border-b bg-gray-50">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
             <h1 className="text-2xl font-bold">Apostolado Cardeal Newman</h1>
           </div>
         </header>
-        <main className="container mx-auto py-8">{children}</main>
+        <main className="container mx-auto py-8 px-4">{children}</main>
       </body>
     </html>
   );
