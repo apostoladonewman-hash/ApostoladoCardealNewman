@@ -4,7 +4,7 @@
   "info": {
     "singularName": "author",
     "pluralName": "authors",
-    "displayName": "Author",
+    "displayName": "Testemunhos",
     "description": "Create authors for your content"
   },
   "options": {
@@ -12,23 +12,30 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "name": {
+    "nome_pessoa": {
       "type": "string"
     },
     "avatar": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
     },
     "email": {
       "type": "string"
     },
-    "articles": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::article.article",
-      "mappedBy": "author"
+    "denominacao_anterior": {
+      "type": "string"
+    },
+    "data_conversao": {
+      "type": "date"
+    },
+    "id_testemunhos": {
+      "type": "uid"
     }
   }
 }
