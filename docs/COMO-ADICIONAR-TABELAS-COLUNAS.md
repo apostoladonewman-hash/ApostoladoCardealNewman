@@ -5,6 +5,7 @@
 ### **Método 1: Via Interface Admin (Recomendado)**
 
 1. **Acesse o painel administrativo**:
+
    ```
    http://localhost:1337/admin
    ```
@@ -30,6 +31,7 @@ npx strapi generate api events
 ### **Método 3: Criação Manual**
 
 #### **Passo 1: Criar a estrutura de pastas**
+
 ```
 src/api/events/
 ├── content-types/
@@ -44,6 +46,7 @@ src/api/events/
 ```
 
 #### **Passo 2: Criar o Schema (schema.json)**
+
 ```json
 {
   "kind": "collectionType",
@@ -109,6 +112,7 @@ src/api/events/
 ```
 
 #### **Passo 3: Criar o Controller (controllers/events.js)**
+
 ```javascript
 'use strict';
 
@@ -122,6 +126,7 @@ module.exports = createCoreController('api::event.event');
 ```
 
 #### **Passo 4: Criar o Service (services/events.js)**
+
 ```javascript
 'use strict';
 
@@ -135,6 +140,7 @@ module.exports = createCoreService('api::event.event');
 ```
 
 #### **Passo 5: Criar as Routes (routes/events.js)**
+
 ```javascript
 'use strict';
 
@@ -212,7 +218,12 @@ Edite o arquivo: `src/api/article/content-types/article/schema.json`
     },
     "blocks": {
       "type": "dynamiczone",
-      "components": ["shared.media", "shared.quote", "shared.rich-text", "shared.slider"]
+      "components": [
+        "shared.media",
+        "shared.quote",
+        "shared.rich-text",
+        "shared.slider"
+      ]
     },
     // 🆕 NOVO CAMPO ADICIONADO
     "tags": {
@@ -245,6 +256,7 @@ Edite o arquivo: `src/api/article/content-types/article/schema.json`
 ## 🔄 **3. Tipos de Campos Disponíveis**
 
 ### **Campos Básicos**
+
 - `string`: Texto curto
 - `text`: Texto longo
 - `richtext`: Texto formatado
@@ -253,23 +265,27 @@ Edite o arquivo: `src/api/article/content-types/article/schema.json`
 - `enumeration`: Lista de opções
 
 ### **Campos Numéricos**
+
 - `integer`: Número inteiro
 - `biginteger`: Número inteiro grande
 - `float`: Número decimal
 - `decimal`: Decimal de alta precisão
 
 ### **Campos de Data**
+
 - `date`: Data
 - `datetime`: Data e hora
 - `time`: Apenas hora
 
 ### **Campos Especiais**
+
 - `boolean`: Verdadeiro/Falso
 - `json`: Dados JSON
 - `uid`: Identificador único
 - `media`: Arquivos/Imagens
 
 ### **Relacionamentos**
+
 - `relation`: Relação com outro content-type
 
 ---
@@ -277,6 +293,7 @@ Edite o arquivo: `src/api/article/content-types/article/schema.json`
 ## 🚀 **4. Após Adicionar Campos/Tabelas**
 
 ### **Reiniciar o Servidor**
+
 ```bash
 # Parar o servidor (Ctrl+C)
 # Iniciar novamente
@@ -286,11 +303,13 @@ yarn develop
 ```
 
 ### **Verificar as Migrações**
+
 - O Strapi criará automaticamente as migrações do banco
 - Verifique no console se há erros
 - As mudanças são aplicadas automaticamente no SQLite
 
 ### **Testar no Admin**
+
 1. Acesse o painel admin
 2. Vá em **Content Manager**
 3. Verifique se a nova tabela/campos aparecem
@@ -303,6 +322,7 @@ yarn develop
 ### **Cenário**: Adicionar relacionamento entre Category e Events
 
 #### **Passo 1: Modificar o schema de Category**
+
 Adicione ao `src/api/category/content-types/category/schema.json`:
 
 ```json
@@ -320,6 +340,7 @@ Adicione ao `src/api/category/content-types/category/schema.json`:
 ```
 
 #### **Passo 2: O campo já existe no Events**
+
 ```json
 {
   "category": {

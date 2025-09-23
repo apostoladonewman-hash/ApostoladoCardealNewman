@@ -1,0 +1,14 @@
+# Ignore artifacts:
+build
+dist
+.strapi
+
+# Ignore dependencies:
+node_modules
+
+# Ignore package manager files
+package-lock.json
+yarn.lock
+
+# Strapi specific
+.tmp

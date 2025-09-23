@@ -263,7 +263,6 @@ erDiagram
 ### Entidades Principais do Conteúdo
 
 1. **ARTICLES** (Artigos)
-
    - Entidade principal para posts do blog
    - Relaciona com Author (muitos para um)
    - Relaciona com Category (muitos para um)
@@ -272,18 +271,15 @@ erDiagram
    - Contém blocos dinâmicos (dynamic zone)
 
 2. **AUTHORS** (Autores)
-
    - Informações dos autores dos artigos
    - Pode ter avatar
    - Relacionamento um-para-muitos com articles
 
 3. **CATEGORIES** (Categorias)
-
    - Organização dos artigos por categoria
    - Relacionamento um-para-muitos com articles
 
 4. **ABOUTS** (Sobre)
-
    - Página única sobre o site/organização
    - Contém blocos dinâmicos (dynamic zone)
 
