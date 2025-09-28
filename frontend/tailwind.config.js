@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
@@ -18,6 +18,8 @@ export default {
     },
     extend: {
       colors: {
+        // Adicionando sua cor personalizada para referência, se necessário
+        'brand-gold': '#D4B834',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

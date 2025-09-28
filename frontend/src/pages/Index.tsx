@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-// import hero from "@/assets/hero-newman.jpg"; // Adicionaremos a imagem depois
+import hero from "@/assets/hero-newman.jpg";
 import { posts, testimonials } from '@/content/mock';
 
 const Index = () => {
@@ -32,7 +32,7 @@ const Index = () => {
 
       <section className="relative overflow-hidden">
         <div className="container grid md:grid-cols-2 gap-8 py-16 md:py-24 items-center">
-          <div>
+          <div className="animate-fade-in-up">
             <h1 className="text-4xl md:text-5xl font-serif font-semibold leading-tight">
               Apostolado Cardeal Newman
             </h1>
@@ -41,7 +41,7 @@ const Index = () => {
               encontrou a plenitude da fé na Igreja Católica.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild variant="hero" size="lg">
+              <Button asChild size="lg">
                 <a href="#depoimentos">Ler depoimentos</a>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -49,15 +49,17 @@ const Index = () => {
               </Button>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+
             <div
-              // src={hero} // Substituído por um placeholder
-              className="w-full h-72 md:h-96 object-cover rounded-lg border shadow-sm bg-secondary"
+              style={{ backgroundImage: `url(${hero})` }}
+              className="w-full h-72 md:h-96 bg-cover bg-center rounded-lg border shadow-sm"
             />
           </div>
         </div>
       </section>
 
+      {/* Seção de Depoimentos */}
       <section id="depoimentos" className="py-12 md:py-16 border-t">
         <div className="container">
           <header className="mb-6 md:mb-8 flex items-end justify-between">
@@ -77,7 +79,7 @@ const Index = () => {
                 to={`/depoimentos/${t.slug}`}
                 className="group"
               >
-                <Card className="p-5 h-full transition-transform duration-200 group-hover:-translate-y-1">
+                <Card className="p-5 h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                   <article>
                     <h3 className="text-lg font-semibold mb-1">{t.person}</h3>
                     <p className="text-xs text-muted-foreground mb-3">
@@ -94,7 +96,8 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="artigos" className="py-12 md:py-16 border-t">
+      {/* Seção de Artigos */}
+      <section id="artigos" className="py-12 md:py-16 border-t bg-secondary/50">
         <div className="container">
           <header className="mb-6 md:mb-8 flex items-end justify-between">
             <div>
@@ -109,7 +112,7 @@ const Index = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.slice(0, 3).map((p) => (
               <Link key={p.slug} to={`/artigos/${p.slug}`} className="group">
-                <Card className="p-5 h-full transition-transform duration-200 group-hover:-translate-y-1">
+                <Card className="p-5 h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                   <article>
                     <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
                     <p className="text-xs text-muted-foreground mb-3">
@@ -127,6 +130,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Seção Newsletter */}
       <section id="assine" className="py-16 border-t">
         <div className="container max-w-3xl text-center">
           <h2 className="text-2xl md:text-3xl font-serif font-semibold">
@@ -135,17 +139,17 @@ const Index = () => {
           <p className="text-muted-foreground mt-2">
             Assine para receber novos depoimentos e artigos.
           </p>
-          <div className="mt-6 flex items-center gap-3 justify-center">
+          <form className="mt-6 flex items-center gap-3 justify-center">
             <input
               aria-label="Seu email"
               type="email"
               placeholder="Seu email"
               className="h-11 px-4 rounded-md border bg-background"
             />
-            <Button variant="hero" className="h-11">
+            <Button className="h-11">
               Assinar
             </Button>
-          </div>
+          </form>
         </div>
       </section>
     </div>
@@ -153,3 +157,4 @@ const Index = () => {
 };
 
 export default Index;
+
