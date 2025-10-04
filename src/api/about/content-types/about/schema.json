@@ -4,8 +4,8 @@
   "info": {
     "singularName": "about",
     "pluralName": "abouts",
-    "displayName": "About",
-    "description": "Write about yourself and the content you create"
+    "displayName": "Sobre Nós",
+    "description": "Informações sobre o Apostolado Cardeal Newman"
   },
   "options": {
     "draftAndPublish": false
@@ -13,7 +13,11 @@
   "pluginOptions": {},
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "default": "Apostolado São John Henry Newman"
+    },
+    "content": {
+      "type": "richtext"
     },
     "blocks": {
       "type": "dynamiczone",

@@ -13,13 +13,21 @@
   "pluginOptions": {},
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
-    "id_categoria": {
-      "type": "uid"
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
     },
     "description": {
       "type": "text"
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::article.article",
+      "mappedBy": "category"
     }
   }
 }

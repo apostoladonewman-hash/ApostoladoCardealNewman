@@ -1,7 +1,9 @@
 ############################
 # OS X
 ############################
-
+.data_processing
+.claude
+.docs
 .DS_Store
 .AppleDouble
 .LSOverride

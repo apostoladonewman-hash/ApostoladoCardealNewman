@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pending_contents",
+  "info": {
+    "singularName": "pending-content",
+    "pluralName": "pending-contents",
+    "displayName": "Pending Content",
+    "description": "Conteúdos pendentes de aprovação do administrador"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tipo_conteudo": {
+      "type": "enumeration",
+      "enum": ["article", "testimony", "comment"],
+      "required": true
+    },
+    "titulo": {
+      "type": "string",
+      "required": true
+    },
+    "conteudo": {
+      "type": "richtext",
+      "required": true
+    },
+    "autor_contribuidor": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "status_aprovacao": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"],
+      "default": "pending"
+    },
+    "motivo_rejeicao": {
+      "type": "text"
+    },
+    "aprovado_por": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "data_submissao": {
+      "type": "datetime",
+      "default": null
+    },
+    "data_aprovacao": {
+      "type": "datetime"
+    },
+    "categoria": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category"
+    },
+    "metadados": {
+      "type": "json"
+    }
+  }
+}

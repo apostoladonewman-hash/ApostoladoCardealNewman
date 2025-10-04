@@ -4,8 +4,8 @@
   "info": {
     "singularName": "global",
     "pluralName": "globals",
-    "displayName": "Global",
-    "description": "Define global settings"
+    "displayName": "Configurações Globais",
+    "description": "Configurações gerais do site"
   },
   "options": {
     "draftAndPublish": false
@@ -14,7 +14,12 @@
   "attributes": {
     "siteName": {
       "type": "string",
-      "required": true
+      "required": true,
+      "default": "Apostolado Cardeal Newman"
+    },
+    "motto": {
+      "type": "string",
+      "default": "Cor ad cor loquitur"
     },
     "favicon": {
       "type": "media",
@@ -25,6 +30,26 @@
     "siteDescription": {
       "type": "text",
       "required": true
+    },
+    "contactEmail": {
+      "type": "email",
+      "default": "apostoladonewman@gmail.com"
+    },
+    "contactPhone": {
+      "type": "string",
+      "default": "+55 63 99225-9781"
+    },
+    "whatsappUrl": {
+      "type": "string",
+      "default": "https://wa.me/5563992259781"
+    },
+    "youtubeUrl": {
+      "type": "string",
+      "default": "https://www.youtube.com/@ApostoladoCardealNewman"
+    },
+    "instagramUrl": {
+      "type": "string",
+      "default": "https://www.instagram.com/apostoladocardealnewman/?hl=en"
     },
     "defaultSeo": {
       "type": "component",

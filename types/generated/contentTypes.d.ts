@@ -376,8 +376,8 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
 export interface ApiAboutAbout extends Struct.SingleTypeSchema {
   collectionName: 'abouts';
   info: {
-    description: 'Write about yourself and the content you create';
-    displayName: 'About';
+    description: 'Informa\u00E7\u00F5es sobre o Apostolado Cardeal Newman';
+    displayName: 'Sobre N\u00F3s';
     pluralName: 'abouts';
     singularName: 'about';
   };
@@ -388,6 +388,7 @@ export interface ApiAboutAbout extends Struct.SingleTypeSchema {
     blocks: Schema.Attribute.DynamicZone<
       ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
     >;
+    content: Schema.Attribute.RichText;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -395,7 +396,8 @@ export interface ApiAboutAbout extends Struct.SingleTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::about.about'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    title: Schema.Attribute.String;
+    title: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Apostolado S\u00E3o John Henry Newman'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -414,19 +416,20 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'>;
     blocks: Schema.Attribute.DynamicZone<
       ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
     >;
-    comentarios: Schema.Attribute.Relation<'oneToMany', 'api::coment.coment'>;
-    cover: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
+    cover: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 80;
+        maxLength: 500;
       }>;
-    id_postagens: Schema.Attribute.UID<''>;
+    fonte_original: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -434,15 +437,11 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    testemunho: Schema.Attribute.Relation<'oneToOne', 'api::author.author'>;
-    title: Schema.Attribute.String;
+    slug: Schema.Attribute.UID<'title'>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    user: Schema.Attribute.Relation<
-      'manyToOne',
-      'plugin::users-permissions.user'
-    >;
   };
 }
 
@@ -458,22 +457,78 @@ export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    ano_nascimento: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 2100;
+          min: 1900;
+        },
+        number
+      >;
+    articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
     avatar: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    biografia: Schema.Attribute.Text;
+    cidade_atual: Schema.Attribute.String;
+    cidade_natural: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     data_conversao: Schema.Attribute.Date;
     denominacao_anterior: Schema.Attribute.String;
-    email: Schema.Attribute.String;
-    id_testemunhos: Schema.Attribute.UID;
+    email: Schema.Attribute.Email;
+    id_testemunhos: Schema.Attribute.UID<'nome_pessoa'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::author.author'
     > &
       Schema.Attribute.Private;
-    nome_pessoa: Schema.Attribute.String;
+    nome_pessoa: Schema.Attribute.String & Schema.Attribute.Required;
+    profissao: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    testemunho_completo: Schema.Attribute.RichText;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiBookBook extends Struct.CollectionTypeSchema {
+  collectionName: 'books';
+  info: {
+    description: 'Cat\u00E1logo de livros recomendados';
+    displayName: 'Livros da Biblioteca';
+    pluralName: 'books';
+    singularName: 'book';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    author: Schema.Attribute.String & Schema.Attribute.Required;
+    available: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    category: Schema.Attribute.Enumeration<
+      [
+        'Obras de Newman',
+        'Sobre Newman',
+        'Forma\u00E7\u00E3o Cat\u00F3lica',
+        'Outros',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'Obras de Newman'>;
+    cover: Schema.Attribute.Media<'images'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    externalUrl: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::book.book'> &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    pdfFile: Schema.Attribute.Media<'files'>;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -492,52 +547,20 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
-    id_categoria: Schema.Attribute.UID;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::category.category'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
-export interface ApiComentComent extends Struct.CollectionTypeSchema {
-  collectionName: 'coments';
-  info: {
-    displayName: 'comentarios';
-    pluralName: 'coments';
-    singularName: 'coment';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    conteudo: Schema.Attribute.Text;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    data_criacao: Schema.Attribute.Date;
-    email: Schema.Attribute.Email;
-    id_comentarios: Schema.Attribute.UID;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::coment.coment'
-    > &
-      Schema.Attribute.Private;
-    nome_autor: Schema.Attribute.String;
-    postagen: Schema.Attribute.Relation<'manyToOne', 'api::article.article'>;
-    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'name'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -547,8 +570,8 @@ export interface ApiComentComent extends Struct.CollectionTypeSchema {
 export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   collectionName: 'globals';
   info: {
-    description: 'Define global settings';
-    displayName: 'Global';
+    description: 'Configura\u00E7\u00F5es gerais do site';
+    displayName: 'Configura\u00E7\u00F5es Globais';
     pluralName: 'globals';
     singularName: 'global';
   };
@@ -556,20 +579,227 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    contactEmail: Schema.Attribute.Email &
+      Schema.Attribute.DefaultTo<'apostoladonewman@gmail.com'>;
+    contactPhone: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'+55 63 99225-9781'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     defaultSeo: Schema.Attribute.Component<'shared.seo', false>;
     favicon: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
+    instagramUrl: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://www.instagram.com/apostoladocardealnewman/?hl=en'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::global.global'
     > &
       Schema.Attribute.Private;
+    motto: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Cor ad cor loquitur'>;
     publishedAt: Schema.Attribute.DateTime;
     siteDescription: Schema.Attribute.Text & Schema.Attribute.Required;
-    siteName: Schema.Attribute.String & Schema.Attribute.Required;
+    siteName: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Apostolado Cardeal Newman'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    whatsappUrl: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://wa.me/5563992259781'>;
+    youtubeUrl: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'https://www.youtube.com/@ApostoladoCardealNewman'>;
+  };
+}
+
+export interface ApiLinkLink extends Struct.CollectionTypeSchema {
+  collectionName: 'links';
+  info: {
+    description: 'Links externos para recursos cat\u00F3licos';
+    displayName: 'Links \u00DAteis';
+    pluralName: 'links';
+    singularName: 'link';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    category: Schema.Attribute.Enumeration<
+      [
+        'Sites Cat\u00F3licos',
+        'Sobre Newman',
+        'Forma\u00E7\u00E3o e Espiritualidade',
+        'Outros',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'Sites Cat\u00F3licos'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::link.link'> &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiNewmanNewman extends Struct.SingleTypeSchema {
+  collectionName: 'newmans';
+  info: {
+    description: 'Informa\u00E7\u00F5es sobre S\u00E3o Jo\u00E3o Henrique Newman';
+    displayName: 'Biografia de Newman';
+    pluralName: 'newmans';
+    singularName: 'newman';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    beatificationYear: Schema.Attribute.Integer &
+      Schema.Attribute.DefaultTo<2010>;
+    biography: Schema.Attribute.RichText;
+    birthDate: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'21 de fevereiro de 1801'>;
+    birthPlace: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Londres, Inglaterra'>;
+    canonizationDate: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'13 de outubro de 2019'>;
+    canonizationYear: Schema.Attribute.Integer &
+      Schema.Attribute.DefaultTo<2019>;
+    cardinalYear: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1879>;
+    categories: Schema.Attribute.JSON &
+      Schema.Attribute.DefaultTo<
+        [
+          {
+            content: '';
+            description: 'Conhe\u00E7a a vida e jornada espiritual de S\u00E3o Jo\u00E3o Henrique Newman';
+            order: 1;
+            slug: 'vida-de-newman';
+            title: 'Vida De Newman';
+          },
+          {
+            content: '';
+            description: 'Recursos visuais e multim\u00EDdia sobre Newman';
+            order: 2;
+            slug: 'painel-sao-newman';
+            title: 'Painel S\u00E3o Newman';
+          },
+          {
+            content: '';
+            description: 'A rela\u00E7\u00E3o de Newman com os l\u00EDderes da Igreja';
+            order: 3;
+            slug: 'newman-pastores-igreja';
+            title: 'Newman E Os Pastores Da Igreja';
+          },
+          {
+            content: '';
+            description: 'Teologia, filosofia e escritos de Newman';
+            order: 4;
+            slug: 'pensamento-newman';
+            title: 'O Pensamento De Newman';
+          },
+          {
+            content: '';
+            description: 'Obras de Newman traduzidas para o portugu\u00EAs';
+            order: 5;
+            slug: 'livros-newman-portugues';
+            title: 'Livros Do Newman Em Portugu\u00EAs';
+          },
+          {
+            content: '';
+            description: 'O Movimento de Oxford e a convers\u00E3o de Newman';
+            order: 6;
+            slug: 'newman-movimento-oxford';
+            title: 'Newman E O Movimento De Oxford';
+          },
+        ]
+      >;
+    conversionYear: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1845>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deathDate: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'11 de agosto de 1890'>;
+    fullName: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'S\u00E3o Jo\u00E3o Henrique Newman'>;
+    legacy: Schema.Attribute.RichText;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::newman.newman'
+    > &
+      Schema.Attribute.Private;
+    motto: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Cor ad cor loquitur'>;
+    mottoTranslation: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'Cora\u00E7\u00E3o fala ao cora\u00E7\u00E3o'>;
+    ordinationYear: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1847>;
+    photo: Schema.Attribute.Media<'images'>;
+    publishedAt: Schema.Attribute.DateTime;
+    quotes: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'S\u00E3o Jo\u00E3o Henrique Newman'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    works: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+  };
+}
+
+export interface ApiPendingContentPendingContent
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'pending_contents';
+  info: {
+    description: 'Conte\u00FAdos pendentes de aprova\u00E7\u00E3o do administrador';
+    displayName: 'Pending Content';
+    pluralName: 'pending-contents';
+    singularName: 'pending-content';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    aprovado_por: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    autor_contribuidor: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    categoria: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
+    conteudo: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    data_aprovacao: Schema.Attribute.DateTime;
+    data_submissao: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::pending-content.pending-content'
+    > &
+      Schema.Attribute.Private;
+    metadados: Schema.Attribute.JSON;
+    motivo_rejeicao: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    status_aprovacao: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    tipo_conteudo: Schema.Attribute.Enumeration<
+      ['article', 'testimony', 'comment']
+    > &
+      Schema.Attribute.Required;
+    titulo: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1033,17 +1263,26 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    autor_vinculado: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::author.author'
+    >;
+    biografia: Schema.Attribute.Text;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    denominacao_anterior: Schema.Attribute.String;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    ex_protestante: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    foto_perfil: Schema.Attribute.Media<'images'>;
     id_usuario: Schema.Attribute.UID;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -1051,12 +1290,16 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
+    nome_completo: Schema.Attribute.String & Schema.Attribute.Required;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    pode_contribuir: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     postagens: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
+    profissao: Schema.Attribute.String;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1064,6 +1307,7 @@ export interface PluginUsersPermissionsUser
       'manyToOne',
       'plugin::users-permissions.role'
     >;
+    testemunho_breve: Schema.Attribute.Text;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1089,9 +1333,12 @@ declare module '@strapi/strapi' {
       'api::about.about': ApiAboutAbout;
       'api::article.article': ApiArticleArticle;
       'api::author.author': ApiAuthorAuthor;
+      'api::book.book': ApiBookBook;
       'api::category.category': ApiCategoryCategory;
-      'api::coment.coment': ApiComentComent;
       'api::global.global': ApiGlobalGlobal;
+      'api::link.link': ApiLinkLink;
+      'api::newman.newman': ApiNewmanNewman;
+      'api::pending-content.pending-content': ApiPendingContentPendingContent;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

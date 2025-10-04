@@ -1,0 +1,135 @@
+{
+  "kind": "singleType",
+  "collectionName": "newmans",
+  "info": {
+    "singularName": "newman",
+    "pluralName": "newmans",
+    "displayName": "Biografia de Newman",
+    "description": "Informações sobre São João Henrique Newman"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "São João Henrique Newman"
+    },
+    "fullName": {
+      "type": "string",
+      "default": "São João Henrique Newman"
+    },
+    "birthDate": {
+      "type": "string",
+      "default": "21 de fevereiro de 1801"
+    },
+    "deathDate": {
+      "type": "string",
+      "default": "11 de agosto de 1890"
+    },
+    "birthPlace": {
+      "type": "string",
+      "default": "Londres, Inglaterra"
+    },
+    "conversionYear": {
+      "type": "integer",
+      "default": 1845
+    },
+    "ordinationYear": {
+      "type": "integer",
+      "default": 1847
+    },
+    "cardinalYear": {
+      "type": "integer",
+      "default": 1879
+    },
+    "beatificationYear": {
+      "type": "integer",
+      "default": 2010
+    },
+    "canonizationYear": {
+      "type": "integer",
+      "default": 2019
+    },
+    "canonizationDate": {
+      "type": "string",
+      "default": "13 de outubro de 2019"
+    },
+    "motto": {
+      "type": "string",
+      "default": "Cor ad cor loquitur"
+    },
+    "mottoTranslation": {
+      "type": "string",
+      "default": "Coração fala ao coração"
+    },
+    "biography": {
+      "type": "richtext"
+    },
+    "legacy": {
+      "type": "richtext"
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "works": {
+      "type": "json",
+      "default": []
+    },
+    "quotes": {
+      "type": "json",
+      "default": []
+    },
+    "categories": {
+      "type": "json",
+      "default": [
+        {
+          "slug": "vida-de-newman",
+          "title": "Vida De Newman",
+          "description": "Conheça a vida e jornada espiritual de São João Henrique Newman",
+          "content": "",
+          "order": 1
+        },
+        {
+          "slug": "painel-sao-newman",
+          "title": "Painel São Newman",
+          "description": "Recursos visuais e multimídia sobre Newman",
+          "content": "",
+          "order": 2
+        },
+        {
+          "slug": "newman-pastores-igreja",
+          "title": "Newman E Os Pastores Da Igreja",
+          "description": "A relação de Newman com os líderes da Igreja",
+          "content": "",
+          "order": 3
+        },
+        {
+          "slug": "pensamento-newman",
+          "title": "O Pensamento De Newman",
+          "description": "Teologia, filosofia e escritos de Newman",
+          "content": "",
+          "order": 4
+        },
+        {
+          "slug": "livros-newman-portugues",
+          "title": "Livros Do Newman Em Português",
+          "description": "Obras de Newman traduzidas para o português",
+          "content": "",
+          "order": 5
+        },
+        {
+          "slug": "newman-movimento-oxford",
+          "title": "Newman E O Movimento De Oxford",
+          "description": "O Movimento de Oxford e a conversão de Newman",
+          "content": "",
+          "order": 6
+        }
+      ]
+    }
+  }
+}

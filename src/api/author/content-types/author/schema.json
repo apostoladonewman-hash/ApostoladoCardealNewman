@@ -13,7 +13,8 @@
   "pluginOptions": {},
   "attributes": {
     "nome_pessoa": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "avatar": {
       "type": "media",
@@ -22,7 +23,7 @@
       "allowedTypes": ["images", "files", "videos"]
     },
     "email": {
-      "type": "string"
+      "type": "email"
     },
     "denominacao_anterior": {
       "type": "string"
@@ -30,8 +31,35 @@
     "data_conversao": {
       "type": "date"
     },
+    "ano_nascimento": {
+      "type": "integer",
+      "min": 1900,
+      "max": 2100
+    },
+    "cidade_natural": {
+      "type": "string"
+    },
+    "cidade_atual": {
+      "type": "string"
+    },
+    "profissao": {
+      "type": "string"
+    },
+    "biografia": {
+      "type": "text"
+    },
+    "testemunho_completo": {
+      "type": "richtext"
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::article.article",
+      "mappedBy": "author"
+    },
     "id_testemunhos": {
-      "type": "uid"
+      "type": "uid",
+      "targetField": "nome_pessoa"
     }
   }
 }

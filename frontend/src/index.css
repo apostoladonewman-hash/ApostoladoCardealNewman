@@ -1,39 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:wght@400;500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Fundo em tons de pergaminho/marfim */
+    --background: 39 44% 97%;
+    --foreground: 28 25% 15%;
 
+    /* Cards em branco puro com bordas douradas */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
- 
-    /* Cor Primária definida com seu tom de dourado */
-    --primary: 49 65% 51%; /* HSL para #D4B834 */
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --card-foreground: 28 25% 15%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
- 
-    --radius: 0.5rem;
+    --popover: 0 0% 100%;
+    --popover-foreground: 28 25% 15%;
+
+    /* Dourado bizantino/litúrgico */
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Tons terrosos/sacros */
+    --secondary: 30 25% 92%;
+    --secondary-foreground: 28 25% 20%;
+
+    --muted: 30 20% 94%;
+    --muted-foreground: 28 15% 45%;
+
+    /* Acento em vermelho cardeal mais suave */
+    --accent: 0 58% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Dourado mais quente para gradientes */
+    --gold-warm: 38 82% 55%;
+
+    /* Bronze litúrgico */
+    --bronze: 25 45% 42%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Bordas em dourado sutil */
+    --border: 43 30% 85%;
+    --input: 43 30% 90%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.375rem;
   }
  
   .dark {
@@ -68,11 +81,187 @@
   }
 }
 
+@keyframes watermark-pulse {
+  0%, 100% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.05);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'EB Garamond', 'Crimson Text', Georgia, serif;
+    position: relative;
+    font-size: 16px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('/src/assets/logo_apostolado.svg');
+    background-size: 600px 600px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+    animation: watermark-pulse 8s ease-in-out infinite;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', 'EB Garamond', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Melhor legibilidade para textos pequenos */
+  .text-xs, .text-sm, small {
+    font-family: 'Crimson Text', Georgia, serif;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+
+  /* Cor ad cor loquitur - tratamento artístico especial */
+  .motto-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg,
+      hsl(var(--bronze)) 0%,
+      hsl(var(--primary)) 35%,
+      hsl(var(--gold-warm)) 65%,
+      hsl(var(--bronze)) 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    text-shadow: none;
+  }
+
+  /* Sutil shimmer para o lema */
+  @keyframes motto-shimmer {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .motto-text {
+    animation: motto-shimmer 8s ease-in-out infinite;
+  }
+
+  /* Versão sem animação para impressão */
+  @media print {
+    .motto-text {
+      animation: none;
+      color: hsl(var(--bronze));
+      -webkit-text-fill-color: hsl(var(--bronze));
+    }
+  }
+}
+
+@layer components {
+  /* Animação para links do cabeçalho */
+  .nav-link-active span {
+    @apply scale-x-100;
+  }
+
+  .via-gold-warm {
+    --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--gold-warm)), var(--tw-gradient-to);
+  }
+
+  .to-bronze {
+    --tw-gradient-to: hsl(var(--bronze));
+  }
+
+  /* Texto com inicial decorativa */
+  .drop-cap::first-letter {
+    @apply float-left text-5xl font-bold leading-none mr-2 text-primary;
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Estilos para conteúdo de artigos e testemunhos */
+  .article-content, .testimony-content {
+    @apply text-foreground leading-relaxed;
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+  }
+
+  .article-content p, .testimony-content p {
+    @apply mb-4;
+    text-indent: 2em;
+    line-height: 1.8;
+  }
+
+  .article-content p:first-of-type, .testimony-content p:first-of-type {
+    text-indent: 0;
+  }
+
+  .article-content h1, .article-content h2, .article-content h3,
+  .testimony-content h1, .testimony-content h2, .testimony-content h3 {
+    @apply font-bold mb-4 mt-8;
+    text-align: left;
+    text-indent: 0;
+  }
+
+  .article-content h1, .testimony-content h1 {
+    @apply text-3xl;
+  }
+
+  .article-content h2, .testimony-content h2 {
+    @apply text-2xl;
+  }
+
+  .article-content h3, .testimony-content h3 {
+    @apply text-xl;
+  }
+
+  .article-content ul, .article-content ol,
+  .testimony-content ul, .testimony-content ol {
+    @apply mb-4 ml-8;
+  }
+
+  .article-content li, .testimony-content li {
+    @apply mb-2;
+  }
+
+  .article-content blockquote, .testimony-content blockquote {
+    @apply border-l-4 border-primary/30 pl-6 py-3 italic my-6 bg-primary/5 rounded-r;
+  }
+
+  /* Card de conteúdo com fundo para não conflitar com marca d'água */
+  .content-card {
+    @apply bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl shadow-lg p-8 md:p-12;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Avatar circular do autor */
+  .author-avatar {
+    @apply w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-primary/20 shadow-lg;
+  }
+
+  .author-avatar-sm {
+    @apply w-12 h-12 rounded-full object-cover border-2 border-primary/20 shadow-md;
   }
 }

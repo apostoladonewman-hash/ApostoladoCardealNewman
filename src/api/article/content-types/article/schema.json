@@ -13,26 +13,34 @@
   "pluginOptions": {},
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "description": {
       "type": "text",
-      "maxLength": 80
+      "maxLength": 500
     },
-    "id_postagens": {
+    "slug": {
       "type": "uid",
-      "targetField": ""
+      "targetField": "title"
     },
     "cover": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": ["images"]
     },
-    "testemunho": {
+    "author": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::author.author"
+      "relation": "manyToOne",
+      "target": "api::author.author",
+      "inversedBy": "articles"
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "articles"
     },
     "blocks": {
       "type": "dynamiczone",
@@ -43,17 +51,8 @@
         "shared.slider"
       ]
     },
-    "user": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "postagens"
-    },
-    "comentarios": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::coment.coment",
-      "mappedBy": "postagen"
+    "fonte_original": {
+      "type": "string"
     }
   }
 }

@@ -74,6 +74,41 @@
       "relation": "oneToMany",
       "target": "api::article.article",
       "mappedBy": "user"
+    },
+    "nome_completo": {
+      "type": "string",
+      "required": true
+    },
+    "foto_perfil": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "biografia": {
+      "type": "text"
+    },
+    "denominacao_anterior": {
+      "type": "string"
+    },
+    "profissao": {
+      "type": "string"
+    },
+    "testemunho_breve": {
+      "type": "text"
+    },
+    "ex_protestante": {
+      "type": "boolean",
+      "default": false
+    },
+    "autor_vinculado": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::author.author"
+    },
+    "pode_contribuir": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
