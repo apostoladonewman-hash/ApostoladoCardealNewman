@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Mail, Phone, MessageCircle } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import Logo from '@/assets/logo_apostolado.svg';
 import { globalService } from '@/services/global';
 

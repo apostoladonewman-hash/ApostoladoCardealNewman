@@ -37,7 +37,7 @@ const NavLinkItem = ({ to, end = false, children, onClick }: { to: string; end?:
 
 export default function Layout({ children }: PropsWithChildren) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const {isAuthenticated } = useAuth();
 
   // Buscar configurações globais
   const { data: globalSettings } = useQuery({

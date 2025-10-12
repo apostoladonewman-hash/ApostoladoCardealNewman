@@ -16,6 +16,7 @@ export interface Testimonial {
   testemunho_completo: string;
   status: 'pending' | 'approved' | 'rejected';
   motivo_rejeicao?: string;
+  data_submissao?:string;
   usuario_vinculado?: number;
   avatar?: any;
 }
