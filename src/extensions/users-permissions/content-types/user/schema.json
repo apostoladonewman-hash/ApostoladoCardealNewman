@@ -32,7 +32,7 @@
     },
     "password": {
       "type": "password",
-      "minLength": 6,
+      "minLength": 8,
       "configurable": false,
       "private": true,
       "searchable": false
@@ -107,6 +107,24 @@
       "target": "api::author.author"
     },
     "pode_contribuir": {
+      "type": "boolean",
+      "default": false
+    },
+    "userLevel": {
+      "type": "enumeration",
+      "enum": ["Usuário", "Moderador", "Administrador"],
+      "default": "Usuário",
+      "required": true
+    },
+    "telefone": {
+      "type": "string"
+    },
+    "twoFactorSecret": {
+      "type": "string",
+      "private": true,
+      "searchable": false
+    },
+    "twoFactorEnabled": {
       "type": "boolean",
       "default": false
     }

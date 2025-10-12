@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "moderation_logs",
+  "info": {
+    "singularName": "moderation-log",
+    "pluralName": "moderation-logs",
+    "displayName": "Log de Moderação",
+    "description": "Registra todas as ações de moderação"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "action": {
+      "type": "enumeration",
+      "enum": ["approved", "rejected", "user_promoted", "user_demoted"],
+      "required": true
+    },
+    "contentType": {
+      "type": "enumeration",
+      "enum": ["article", "testimonial", "user"],
+      "required": true
+    },
+    "contentId": {
+      "type": "integer",
+      "required": true
+    },
+    "moderator": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "reason": {
+      "type": "text"
+    },
+    "previousStatus": {
+      "type": "string"
+    },
+    "newStatus": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/auth';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -33,6 +34,9 @@ export default function AdminPainel() {
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<PendingContent | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!authService.isAuthenticated() || !authService.isAdmin()) {
@@ -41,7 +45,7 @@ export default function AdminPainel() {
     }
 
     loadPendingContents();
-  }, [navigate]);
+  }, [navigate, page]);
 
   const loadPendingContents = async () => {
     try {
@@ -49,10 +53,16 @@ export default function AdminPainel() {
       const response = await axios.get(`${API_URL}/api/pending-contents/pending`, {
         headers: {
           Authorization: `Bearer ${token}`
+        },
+        params: {
+          'pagination[page]': page,
+          'pagination[pageSize]': pageSize,
+          'pagination[withCount]': true
         }
       });
 
       setPendingContents(response.data.data);
+      setTotal(response.data.meta?.pagination?.total || 0);
     } catch (err: any) {
       setError('Erro ao carregar conteúdos pendentes');
     } finally {
@@ -223,7 +233,12 @@ export default function AdminPainel() {
                       <h4 className="font-semibold text-foreground mb-3">Conteúdo:</h4>
                       <div
                         className="prose prose-sm max-w-none p-4 bg-muted/30 rounded-lg"
-                        dangerouslySetInnerHTML={{ __html: content.conteudo }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(content.conteudo, {
+                            ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote'],
+                            ALLOWED_ATTR: ['href', 'target', 'rel']
+                          })
+                        }}
                       />
                     </div>
 
@@ -270,6 +285,52 @@ export default function AdminPainel() {
                 )}
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Paginação */}
+        {total > pageSize && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <Button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              variant="outline"
+              size="sm"
+            >
+              Anterior
+            </Button>
+
+            <div className="flex items-center gap-2">
+              {Array.from({ length: Math.ceil(total / pageSize) }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === Math.ceil(total / pageSize) || Math.abs(p - page) <= 1)
+                .map((p, idx, arr) => (
+                  <div key={p} className="flex items-center gap-2">
+                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="text-muted-foreground">...</span>}
+                    <Button
+                      onClick={() => setPage(p)}
+                      variant={page === p ? 'default' : 'outline'}
+                      size="sm"
+                      className="min-w-[40px]"
+                    >
+                      {p}
+                    </Button>
+                  </div>
+                ))
+              }
+            </div>
+
+            <Button
+              onClick={() => setPage(p => Math.min(Math.ceil(total / pageSize), p + 1))}
+              disabled={page === Math.ceil(total / pageSize)}
+              variant="outline"
+              size="sm"
+            >
+              Próxima
+            </Button>
+
+            <span className="text-sm text-muted-foreground ml-4">
+              Página {page} de {Math.ceil(total / pageSize)} ({total} itens)
+            </span>
           </div>
         )}
       </div>

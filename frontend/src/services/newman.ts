@@ -10,6 +10,14 @@ export interface NewmanQuote {
   author: string;
 }
 
+export interface NewmanCategory {
+  slug: string;
+  title: string;
+  description?: string;
+  content?: string;
+  order: number;
+}
+
 export interface Newman {
   title: string;
   fullName: string;
@@ -32,6 +40,7 @@ export interface Newman {
   };
   works: NewmanWork[];
   quotes: NewmanQuote[];
+  categories?: NewmanCategory[];
 }
 
 export interface NewmanResponse {
@@ -59,6 +68,7 @@ export interface NewmanResponse {
     };
     works: NewmanWork[];
     quotes: NewmanQuote[];
+    categories?: NewmanCategory[];
   };
   meta: Record<string, unknown>;
 }
@@ -92,7 +102,8 @@ export const newmanService = {
       legacy: data.data.legacy,
       photo: data.data.photo,
       works: data.data.works || [],
-      quotes: data.data.quotes || []
+      quotes: data.data.quotes || [],
+      categories: data.data.categories || []
     };
   },
 };

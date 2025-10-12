@@ -42,6 +42,9 @@
       "target": "api::category.category",
       "inversedBy": "articles"
     },
+    "content": {
+      "type": "richtext"
+    },
     "blocks": {
       "type": "dynamiczone",
       "components": [
@@ -53,6 +56,32 @@
     },
     "fonte_original": {
       "type": "string"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "postagens"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"],
+      "default": "pending",
+      "required": true
+    },
+    "motivo_rejeicao": {
+      "type": "text"
+    },
+    "data_submissao": {
+      "type": "datetime"
+    },
+    "data_moderacao": {
+      "type": "datetime"
+    },
+    "moderado_por": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

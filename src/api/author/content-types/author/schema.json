@@ -60,6 +60,31 @@
     "id_testemunhos": {
       "type": "uid",
       "targetField": "nome_pessoa"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"],
+      "default": "pending",
+      "required": true
+    },
+    "usuario_vinculado": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "motivo_rejeicao": {
+      "type": "text"
+    },
+    "data_submissao": {
+      "type": "datetime"
+    },
+    "data_moderacao": {
+      "type": "datetime"
+    },
+    "moderado_por": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

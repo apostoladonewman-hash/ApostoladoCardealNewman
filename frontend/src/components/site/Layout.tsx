@@ -7,6 +7,7 @@ import Logo from '@/assets/logo_apostolado.svg';
 import { useAuth } from '@/contexts/AuthContext';
 import { globalService } from '@/services/global';
 import Footer from '@/components/site/Footer';
+import UserMenu from '@/components/site/UserMenu';
 
 const NavLinkItem = ({ to, end = false, children, onClick }: { to: string; end?: boolean; children: React.ReactNode; onClick: () => void; }) => {
   return (
@@ -24,7 +25,7 @@ const NavLinkItem = ({ to, end = false, children, onClick }: { to: string; end?:
     >
       {({ isActive }) => (
         <>
-          {children}
+          <span aria-current={isActive ? 'page' : undefined}>{children}</span>
           <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary to-bronze transform origin-left transition-transform duration-300 ${
             isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
           }`}></span>
@@ -79,7 +80,7 @@ export default function Layout({ children }: PropsWithChildren) {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Menu principal">
             <NavLinkItem to="/" end onClick={closeMenu}>Home</NavLinkItem>
             <NavLinkItem to="/sobre" onClick={closeMenu}>Sobre Nós</NavLinkItem>
             <NavLinkItem to="/newman" onClick={closeMenu}>Newman</NavLinkItem>
@@ -92,12 +93,7 @@ export default function Layout({ children }: PropsWithChildren) {
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <Button asChild size="sm" className="bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] hover:from-[hsl(var(--bronze))] hover:to-[hsl(var(--primary))] text-white font-semibold shadow-md hover:shadow-lg transition-all">
-                <Link to="/perfil">
-                  <User className="w-4 h-4 mr-2" />
-                  {user?.username || 'Perfil'}
-                </Link>
-              </Button>
+              <UserMenu />
             ) : (
               <>
                 <Button asChild variant="outline" size="sm" className="border-[hsl(var(--bronze))] text-[hsl(var(--bronze))] hover:bg-[hsl(var(--bronze))] hover:text-white">
@@ -136,7 +132,7 @@ export default function Layout({ children }: PropsWithChildren) {
           }`}
         >
           <div className="border-t border-border/40 bg-background/95 backdrop-blur-sm">
-            <nav className="container flex flex-col items-stretch py-6 space-y-1">
+            <nav className="container flex flex-col items-stretch py-6 space-y-1" role="navigation" aria-label="Menu mobile">
               <NavLinkItem to="/" end onClick={closeMenu}>Home</NavLinkItem>
               <NavLinkItem to="/sobre" onClick={closeMenu}>Sobre Nós</NavLinkItem>
               <NavLinkItem to="/newman" onClick={closeMenu}>Newman</NavLinkItem>
@@ -148,12 +144,18 @@ export default function Layout({ children }: PropsWithChildren) {
 
               <div className="pt-4 mt-2 border-t border-border/40">
                 {isAuthenticated ? (
-                  <Button asChild className="w-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] text-white shadow-md hover:shadow-lg transition-all">
-                    <Link to="/perfil" onClick={closeMenu}>
-                      <User className="w-4 h-4 mr-2" />
-                      Meu Perfil
-                    </Link>
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild className="w-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] text-white shadow-md hover:shadow-lg transition-all">
+                      <Link to="/perfil" onClick={closeMenu}>
+                        <User className="w-4 h-4 mr-2" />
+                        Meu Perfil
+                      </Link>
+                    </Button>
+                    <div className="flex items-center justify-center gap-2 py-2">
+                      <UserMenu />
+                      <span className="text-sm text-muted-foreground">ou use o menu</span>
+                    </div>
+                  </div>
                 ) : (
                   <div className="w-full space-y-2">
                     <Button asChild variant="outline" className="w-full border-[hsl(var(--bronze))] text-[hsl(var(--bronze))] hover:bg-[hsl(var(--bronze))] hover:text-white transition-all">
@@ -170,7 +172,7 @@ export default function Layout({ children }: PropsWithChildren) {
         </div>
       </header>
 
-      <main className="flex-1 relative z-10">{children}</main>
+      <main className="flex-1 relative z-10" id="main-content">{children}</main>
 
       <Footer />
     </div>

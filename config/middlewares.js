@@ -5,7 +5,7 @@ module.exports = [
   {
     name: 'strapi::cors',
     config: {
-      origin: ['http://localhost:5173', 'http://localhost:3000'],
+      origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
       credentials: true,
     },
   },
@@ -15,4 +15,15 @@ module.exports = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  // Rate limiting middleware para proteção contra brute force
+  {
+    name: 'global::rate-limit',
+    config: {},
+  },
+  // Helmet middleware para headers de segurança
+  // Configurado para permitir recursos cross-origin em desenvolvimento
+  {
+    name: 'global::helmet',
+    config: {},
+  },
 ];

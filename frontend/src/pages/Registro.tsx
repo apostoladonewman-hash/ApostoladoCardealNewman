@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
+import { validatePassword } from '@/utils/password-validation';
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -25,6 +27,14 @@ export default function Registro() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validar senha antes de enviar
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.message || 'Senha não atende aos requisitos de segurança');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -102,10 +112,11 @@ export default function Registro() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={8}
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
               />
+              <PasswordStrengthMeter password={formData.password} />
             </div>
 
             <Button

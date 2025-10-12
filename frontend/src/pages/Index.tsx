@@ -47,6 +47,32 @@ const Index = () => {
         </script>
       </Helmet>
 
+      {/* --- BOTÃO FLUTUANTE DO WHATSAPP --- */}
+      <a
+        href="https://chat.whatsapp.com/F8GVRhW21OUEcBeoZjptO4"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Entrar no grupo do WhatsApp"
+        className="group fixed bottom-6 right-6 z-50"
+      >
+        <div className="relative flex items-center">
+          <div className="absolute right-full mr-4 hidden whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-sm font-semibold text-background shadow-md transition-opacity duration-300 group-hover:opacity-100 lg:block opacity-0">
+            Entre no nosso grupo
+          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-9 w-9"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.655 4.357 1.846 6.097l-1.142 4.155 4.272-1.119z" />
+            </svg>
+          </div>
+        </div>
+      </a>
+      {/* --- FIM DO BOTÃO FLUTUANTE --- */}
+
       <section className="relative overflow-hidden">
         {/* Gradiente decorativo superior */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
@@ -336,7 +362,7 @@ const Index = () => {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-[hsl(var(--accent))] to-[hsl(var(--accent))]/80 hover:from-[hsl(var(--accent))]/90 hover:to-[hsl(var(--accent))]/70 text-white font-semibold transition-all shadow-md hover:shadow-lg"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
+                  <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                 </svg>
                 Ir para o YouTube
               </a>

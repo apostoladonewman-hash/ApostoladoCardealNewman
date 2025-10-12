@@ -421,10 +421,13 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
     >;
     category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
+    content: Schema.Attribute.RichText;
     cover: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    data_moderacao: Schema.Attribute.DateTime;
+    data_submissao: Schema.Attribute.DateTime;
     description: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
@@ -436,12 +439,24 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       'api::article.article'
     > &
       Schema.Attribute.Private;
+    moderado_por: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    motivo_rejeicao: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'>;
+    status: Schema.Attribute.Enumeration<['pending', 'approved', 'rejected']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -474,6 +489,8 @@ export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     data_conversao: Schema.Attribute.Date;
+    data_moderacao: Schema.Attribute.DateTime;
+    data_submissao: Schema.Attribute.DateTime;
     denominacao_anterior: Schema.Attribute.String;
     email: Schema.Attribute.Email;
     id_testemunhos: Schema.Attribute.UID<'nome_pessoa'>;
@@ -483,13 +500,25 @@ export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
       'api::author.author'
     > &
       Schema.Attribute.Private;
+    moderado_por: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    motivo_rejeicao: Schema.Attribute.Text;
     nome_pessoa: Schema.Attribute.String & Schema.Attribute.Required;
     profissao: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'approved', 'rejected']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
     testemunho_completo: Schema.Attribute.RichText;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    usuario_vinculado: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -648,6 +677,53 @@ export interface ApiLinkLink extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiModerationLogModerationLog
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'moderation_logs';
+  info: {
+    description: 'Registra todas as a\u00E7\u00F5es de modera\u00E7\u00E3o';
+    displayName: 'Log de Modera\u00E7\u00E3o';
+    pluralName: 'moderation-logs';
+    singularName: 'moderation-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    action: Schema.Attribute.Enumeration<
+      ['approved', 'rejected', 'user_promoted', 'user_demoted']
+    > &
+      Schema.Attribute.Required;
+    contentId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    contentType: Schema.Attribute.Enumeration<
+      ['article', 'testimonial', 'user']
+    > &
+      Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::moderation-log.moderation-log'
+    > &
+      Schema.Attribute.Private;
+    metadata: Schema.Attribute.JSON;
+    moderator: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    > &
+      Schema.Attribute.Required;
+    newStatus: Schema.Attribute.String;
+    previousStatus: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    reason: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1294,7 +1370,7 @@ export interface PluginUsersPermissionsUser
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
-        minLength: 6;
+        minLength: 8;
       }>;
     pode_contribuir: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
@@ -1307,10 +1383,19 @@ export interface PluginUsersPermissionsUser
       'manyToOne',
       'plugin::users-permissions.role'
     >;
+    telefone: Schema.Attribute.String;
     testemunho_breve: Schema.Attribute.Text;
+    twoFactorEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    twoFactorSecret: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    userLevel: Schema.Attribute.Enumeration<
+      ['Usu\u00E1rio', 'Moderador', 'Administrador']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Usu\u00E1rio'>;
     username: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique &
@@ -1337,6 +1422,7 @@ declare module '@strapi/strapi' {
       'api::category.category': ApiCategoryCategory;
       'api::global.global': ApiGlobalGlobal;
       'api::link.link': ApiLinkLink;
+      'api::moderation-log.moderation-log': ApiModerationLogModerationLog;
       'api::newman.newman': ApiNewmanNewman;
       'api::pending-content.pending-content': ApiPendingContentPendingContent;
       'plugin::content-releases.release': PluginContentReleasesRelease;

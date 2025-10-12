@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Mail, Phone, } from 'lucide-react';
+import { Mail, Phone, MessageCircle } from 'lucide-react';
 import Logo from '@/assets/logo_apostolado.svg';
 import { globalService } from '@/services/global';
 
@@ -30,7 +30,7 @@ export default function Footer() {
             <div className="flex items-center gap-3 justify-center md:justify-start group">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/10 rounded-full blur-md group-hover:blur-lg transition-all"></div>
-                <img src={Logo} alt="Logo" className="h-10 w-10 opacity-90 relative z-10" />
+                <img src={Logo} alt="Logo Apostolado Cardeal Newman" className="h-10 w-10 opacity-90 relative z-10" />
               </div>
               <div>
                 <p className="font-bold text-lg text-foreground">{siteName}</p>

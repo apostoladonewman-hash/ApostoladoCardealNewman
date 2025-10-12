@@ -19,6 +19,14 @@ export interface User {
   blocked: boolean;
   createdAt: string;
   updatedAt: string;
+  userLevel?: 'Usuário' | 'Moderador' | 'Administrador';
+  nome_completo?: string;
+  foto_perfil?: any;
+  role?: {
+    id: number;
+    name: string;
+    type: string;
+  };
 }
 
 export interface AuthResponse {
@@ -32,13 +40,22 @@ export const authService = {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>('/auth/local', credentials);
-    
-    // Salvar token no localStorage
+
+    // Salvar token temporariamente
     if (data.jwt) {
       localStorage.setItem('token', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userId', data.user.id.toString());
+
+      // Buscar dados completos do usuário incluindo foto_perfil
+      const fullUser = await this.me();
+
+      // Retornar resposta com dados completos
+      return {
+        jwt: data.jwt,
+        user: fullUser
+      };
     }
-    
+
     return data;
   },
 
@@ -47,13 +64,14 @@ export const authService = {
    */
   async register(userData: RegisterData): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>('/auth/local/register', userData);
-    
-    // Salvar token no localStorage
+
+    // Salvar token e dados do usuário no localStorage
     if (data.jwt) {
       localStorage.setItem('token', data.jwt);
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userId', data.user.id.toString());
     }
-    
+
     return data;
   },
 
@@ -63,6 +81,7 @@ export const authService = {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
   },
 
   /**
@@ -74,11 +93,21 @@ export const authService = {
       throw new Error('No token found');
     }
 
-    const { data } = await api.get<User>('/users/me', {
+    const { data } = await api.get<User>('/users/me?populate=*', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    console.log('🔍 DEBUG /users/me resposta completa:', data);
+
+    // Salvar também o userId no localStorage
+    if (data.id) {
+      localStorage.setItem('userId', data.id.toString());
+    }
+
+    // Atualizar localStorage com dados completos incluindo role e userLevel
+    localStorage.setItem('user', JSON.stringify(data));
 
     return data;
   },
@@ -94,9 +123,16 @@ export const authService = {
    * Verificar se usuário é administrador
    */
   isAdmin(): boolean {
-    // Implementar lógica de verificação de admin quando o backend estiver configurado
-    // Por enquanto, retorna false
-    return false;
+    const user = this.getUser();
+    if (!user || !user.role) {
+      return false;
+    }
+
+    // Verificar se o role type é 'authenticated' (admin padrão do Strapi)
+    // ou se o nome do role contém 'admin'
+    return user.role.type === 'admin' ||
+           user.role.name.toLowerCase().includes('admin') ||
+           user.role.type === 'authenticated'; // Temporário: ajustar conforme configuração
   },
 
   /**

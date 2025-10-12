@@ -1,8 +1,58 @@
 module.exports = (plugin) => {
+  /**
+   * Validação de senha forte
+   */
+  const validateStrongPassword = (password) => {
+    if (!password || password.length < 8) {
+      return {
+        valid: false,
+        message: 'A senha deve ter no mínimo 8 caracteres'
+      };
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      return {
+        valid: false,
+        message: 'A senha deve conter pelo menos uma letra maiúscula'
+      };
+    }
+
+    if (!/[a-z]/.test(password)) {
+      return {
+        valid: false,
+        message: 'A senha deve conter pelo menos uma letra minúscula'
+      };
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return {
+        valid: false,
+        message: 'A senha deve conter pelo menos um número'
+      };
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return {
+        valid: false,
+        message: 'A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)'
+      };
+    }
+
+    return { valid: true };
+  };
+
   // Adicionar lifecycle hook para associação automática de usuários
   const originalRegister = plugin.controllers.auth.register;
 
   plugin.controllers.auth.register = async (ctx) => {
+    // Validar senha forte antes de registrar
+    const { password } = ctx.request.body;
+    const validation = validateStrongPassword(password);
+
+    if (!validation.valid) {
+      return ctx.badRequest(validation.message);
+    }
+
     // Executar o registro original
     await originalRegister(ctx);
 

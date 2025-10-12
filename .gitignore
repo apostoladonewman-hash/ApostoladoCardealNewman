@@ -11,7 +11,7 @@ Icon
 .Spotlight-V100
 .Trashes
 ._*
-
+docs
 
 ############################
 # Linux
@@ -131,3 +131,29 @@ dist
 build
 .strapi-updater.json
 .strapi-cloud.json
+
+############################
+# Backups
+############################
+
+backups/
+*.sql
+*.dump
+*.backup
+
+############################
+# Docker
+############################
+
+.dockerignore.backup
+docker-compose.override.yml
+
+############################
+# Frontend
+############################
+
+frontend/dist
+frontend/build
+frontend/.vite
+frontend/.cache
+criar_paginas.bat

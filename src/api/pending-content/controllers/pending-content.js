@@ -14,12 +14,29 @@ module.exports = {
     try {
       const { tipo_conteudo, titulo, conteudo, categoria } = ctx.request.body.data;
 
+      // Validar dados obrigatórios
+      if (!tipo_conteudo || !titulo || !conteudo) {
+        return ctx.badRequest('Campos obrigatórios: tipo_conteudo, titulo, conteudo');
+      }
+
+      // Validar tipo de conteúdo
+      const tiposValidos = ['article', 'testimony', 'comment'];
+      if (!tiposValidos.includes(tipo_conteudo)) {
+        return ctx.badRequest('Tipo de conteúdo inválido');
+      }
+
+      // Sanitizar título
+      const tituloSanitizado = titulo.trim().substring(0, 255);
+      if (tituloSanitizado.length < 3) {
+        return ctx.badRequest('Título deve ter pelo menos 3 caracteres');
+      }
+
       const pendingContent = await strapi.entityService.create(
         'api::pending-content.pending-content',
         {
           data: {
             tipo_conteudo,
-            titulo,
+            titulo: tituloSanitizado,
             conteudo,
             categoria,
             autor_contribuidor: user.id,
@@ -62,15 +79,25 @@ module.exports = {
 
       // Criar o artigo aprovado
       if (pendingContent.tipo_conteudo === 'article') {
+        const articleData = {
+          title: pendingContent.titulo,
+          content: pendingContent.conteudo,
+          user: pendingContent.autor_contribuidor?.id,
+          publishedAt: new Date()
+        };
+
+        // Adicionar categoria apenas se existir
+        if (pendingContent.categoria?.id) {
+          articleData.category = pendingContent.categoria.id;
+        }
+
+        // Adicionar author apenas se existir
+        if (pendingContent.autor_contribuidor?.autor_vinculado?.id) {
+          articleData.author = pendingContent.autor_contribuidor.autor_vinculado.id;
+        }
+
         const newArticle = await strapi.entityService.create('api::article.article', {
-          data: {
-            title: pendingContent.titulo,
-            content: pendingContent.conteudo,
-            category: pendingContent.categoria?.id,
-            author: pendingContent.autor_contribuidor?.autor_vinculado?.id,
-            user: pendingContent.autor_contribuidor?.id,
-            publishedAt: new Date()
-          }
+          data: articleData
         });
 
         // Atualizar o status do conteúdo pendente
