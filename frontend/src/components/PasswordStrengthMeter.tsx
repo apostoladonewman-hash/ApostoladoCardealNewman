@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
-import { validatePassword, type PasswordValidationResult } from '@/utils/password-validation';
+import {
+  validatePassword,
+  type PasswordValidationResult,
+} from '@/utils/password-validation';
 
 interface PasswordStrengthMeterProps {
   password: string;
@@ -8,11 +11,11 @@ interface PasswordStrengthMeterProps {
 
 export const PasswordStrengthMeter = ({
   password,
-  showRequirements = true
+  showRequirements = true,
 }: PasswordStrengthMeterProps) => {
   const validation: PasswordValidationResult = useMemo(
     () => validatePassword(password),
-    [password]
+    [password],
   );
 
   if (!password) return null;
@@ -61,7 +64,10 @@ export const PasswordStrengthMeter = ({
     { text: 'Uma letra maiúscula', met: /[A-Z]/.test(password) },
     { text: 'Uma letra minúscula', met: /[a-z]/.test(password) },
     { text: 'Um número', met: /[0-9]/.test(password) },
-    { text: 'Um caractere especial (!@#$%...)', met: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
+    {
+      text: 'Um caractere especial (!@#$%...)',
+      met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    },
   ];
 
   return (
@@ -70,11 +76,15 @@ export const PasswordStrengthMeter = ({
       <div className="space-y-1">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600">Força da senha:</span>
-          <span className={`font-medium ${
-            validation.strength === 'strong' ? 'text-green-600' :
-            validation.strength === 'medium' ? 'text-yellow-600' :
-            'text-red-600'
-          }`}>
+          <span
+            className={`font-medium ${
+              validation.strength === 'strong'
+                ? 'text-green-600'
+                : validation.strength === 'medium'
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
+            }`}
+          >
             {getStrengthText()}
           </span>
         </div>
@@ -104,9 +114,7 @@ export const PasswordStrengthMeter = ({
 
       {/* Error Message */}
       {!validation.valid && validation.message && (
-        <p className="text-sm text-red-600 mt-1">
-          {validation.message}
-        </p>
+        <p className="text-sm text-red-600 mt-1">{validation.message}</p>
       )}
     </div>
   );

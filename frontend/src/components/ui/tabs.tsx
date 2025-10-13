@@ -18,7 +18,7 @@ export function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
   const sortedTabs = [...tabs].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [activeTab, setActiveTab] = useState(defaultTab || sortedTabs[0]?.slug);
 
-  const currentTab = sortedTabs.find(tab => tab.slug === activeTab);
+  const currentTab = sortedTabs.find((tab) => tab.slug === activeTab);
 
   return (
     <div className={className}>
@@ -31,9 +31,10 @@ export function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
               onClick={() => setActiveTab(tab.slug)}
               className={`
                 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-300
-                ${activeTab === tab.slug
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/30'
+                ${
+                  activeTab === tab.slug
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/30'
                 }
               `}
               aria-current={activeTab === tab.slug ? 'page' : undefined}

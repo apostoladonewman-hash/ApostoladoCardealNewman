@@ -2,6 +2,15 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api';
 
+// Interface para a imagem de avatar, evitando o uso de 'any'
+export interface Avatar {
+  id: number;
+  url: string;
+  alternativeText?: string;
+  name: string;
+  // Adicione outros campos se o Strapi retornar mais dados
+}
+
 export interface Testimonial {
   id?: number;
   nome_pessoa: string;
@@ -16,9 +25,9 @@ export interface Testimonial {
   testemunho_completo: string;
   status: 'pending' | 'approved' | 'rejected';
   motivo_rejeicao?: string;
-  data_submissao?:string;
+  data_submissao?: string;
   usuario_vinculado?: number;
-  avatar?: any;
+  avatar?: Avatar | null; // Tipo corrigido
 }
 
 class TestimonialService {
@@ -42,7 +51,7 @@ class TestimonialService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -54,19 +63,25 @@ class TestimonialService {
       `${API_URL}/authors?filters[usuario_vinculado][id][$eq]=${userId}&populate[0]=avatar`,
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
 
-    return response.data.data[0] || null;
+    if (response.data.data && response.data.data.length > 0) {
+      return response.data.data[0];
+    }
+    return null;
   }
 
-  async updateTestimonial(id: number, data: Partial<Testimonial>): Promise<Testimonial> {
+  async updateTestimonial(
+    id: number,
+    data: Partial<Testimonial>,
+  ): Promise<Testimonial> {
     const response = await axios.put(
       `${API_URL}/authors/${id}`,
-      { data },
+      { data: { ...data, status: 'pending' } }, // Reenviar para moderação ao atualizar
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -92,7 +107,7 @@ class TestimonialService {
       `${API_URL}/authors?filters[status][$eq]=pending&populate=*`,
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -108,7 +123,7 @@ class TestimonialService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -125,7 +140,7 @@ class TestimonialService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }

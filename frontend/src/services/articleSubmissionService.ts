@@ -2,13 +2,22 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api';
 
+// Interface para a imagem de capa, evitando o uso de 'any'
+interface CoverImage {
+  id: number;
+  url: string;
+  alternativeText?: string;
+  name: string;
+  // Adicione outros campos se necessário
+}
+
 export interface ArticleSubmission {
   id?: number;
   title: string;
   description?: string;
   content: string;
   category?: number;
-  cover?: any;
+  cover?: CoverImage; // Tipo corrigido
   status: 'pending' | 'approved' | 'rejected';
   motivo_rejeicao?: string;
   user?: number;
@@ -21,7 +30,9 @@ class ArticleSubmissionService {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  async submitArticle(data: Partial<ArticleSubmission>): Promise<ArticleSubmission> {
+  async submitArticle(
+    data: Partial<ArticleSubmission>,
+  ): Promise<ArticleSubmission> {
     const userId = localStorage.getItem('userId');
 
     const response = await axios.post(
@@ -37,7 +48,7 @@ class ArticleSubmissionService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -49,18 +60,21 @@ class ArticleSubmissionService {
       `${API_URL}/articles?filters[user][id][$eq]=${userId}&populate=*`,
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
 
-  async updateArticle(id: number, data: Partial<ArticleSubmission>): Promise<ArticleSubmission> {
+  async updateArticle(
+    id: number,
+    data: Partial<ArticleSubmission>,
+  ): Promise<ArticleSubmission> {
     const response = await axios.put(
       `${API_URL}/articles/${id}`,
       { data },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -92,7 +106,7 @@ class ArticleSubmissionService {
       `${API_URL}/articles?filters[status][$eq]=pending&populate=*`,
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -109,7 +123,7 @@ class ArticleSubmissionService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }
@@ -126,7 +140,7 @@ class ArticleSubmissionService {
       },
       {
         headers: this.getAuthHeader(),
-      }
+      },
     );
     return response.data.data;
   }

@@ -1,3 +1,5 @@
+/* global strapi */
+
 /**
  * Email Notification Service
  * Envia emails de notificação para usuários sobre moderação
@@ -77,7 +79,9 @@ module.exports = {
           </html>
         `,
       });
-      strapi.log.info(`Email de aprovação de testemunho enviado para ${userEmail}`);
+      strapi.log.info(
+        `Email de aprovação de testemunho enviado para ${userEmail}`,
+      );
     } catch (error) {
       strapi.log.error('Erro ao enviar email de aprovação:', error);
     }
@@ -166,7 +170,9 @@ module.exports = {
           </html>
         `,
       });
-      strapi.log.info(`Email de rejeição de testemunho enviado para ${userEmail}`);
+      strapi.log.info(
+        `Email de rejeição de testemunho enviado para ${userEmail}`,
+      );
     } catch (error) {
       strapi.log.error('Erro ao enviar email de rejeição:', error);
     }

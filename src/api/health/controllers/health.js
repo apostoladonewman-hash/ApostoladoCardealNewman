@@ -1,8 +1,10 @@
+/* global strapi */
+'use strict';
+
 /**
  * Health check controller
  * Provides endpoints for monitoring application health
  */
-
 module.exports = {
   /**
    * Comprehensive health check
@@ -94,10 +96,10 @@ module.exports = {
 /**
  * Helper function to check database health
  */
-async function checkDatabase(strapi) {
+async function checkDatabase(strapiInstance) {
   try {
     const start = Date.now();
-    await strapi.db.connection.raw('SELECT 1');
+    await strapiInstance.db.connection.raw('SELECT 1');
     const responseTime = Date.now() - start;
 
     return {

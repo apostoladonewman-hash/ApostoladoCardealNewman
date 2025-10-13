@@ -1,399 +1,346 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import adminService, { User } from '@/services/adminService';
+// A importação está correta, os erros eram de tipagem
+import adminService, { UserWithLevel } from '@/services/adminService';
+import { Helmet } from 'react-helmet-async';
+import { toast } from 'sonner';
 import {
-  Users,
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  Lock,
-  Unlock,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  Search,
-} from 'lucide-react';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal, Shield, User, UserCog } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { SearchBar } from '@/components/ui/search-bar';
+import { AxiosError } from 'axios';
+
+// Definição de tipo correta para a estrutura de erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function Admin() {
-  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithLevel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [processing, setProcessing] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Check if user is admin
-  const isAdmin = currentUser?.userLevel === 'Administrador';
-
-  useEffect(() => {
-    if (!isAdmin) {
-      navigate('/perfil');
-      return;
-    }
-    loadUsers();
-  }, [isAdmin, navigate]);
-
   const loadUsers = async () => {
-    setLoading(true);
-    setError('');
     try {
+      setLoading(true);
       const data = await adminService.getAllUsers();
-      // Sort users by userLevel and then by name
-      const sortedUsers = data.sort((a, b) => {
-        const levelOrder = { Administrador: 0, Moderador: 1, 'Usuário': 2 };
-        const levelA = levelOrder[a.userLevel] ?? 3;
-        const levelB = levelOrder[b.userLevel] ?? 3;
-        if (levelA !== levelB) return levelA - levelB;
-        return a.username.localeCompare(b.username);
-      });
-      setUsers(sortedUsers);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao carregar usuários');
-      console.error(err);
+      setUsers(data);
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message ||
+          'Erro ao carregar usuários',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChangeUserLevel = async (userId: number, newLevel: 'Usuário' | 'Moderador' | 'Administrador') => {
-    if (userId === currentUser?.id) {
-      setError('Você não pode alterar seu próprio nível de acesso');
-      return;
-    }
-
+  const handleChangeUserLevel = async (
+    userId: number,
+    newLevel: 'Usuário' | 'Moderador' | 'Administrador',
+  ) => {
+    if (processing) return;
     setProcessing(userId);
-    setError('');
-    setSuccess('');
-
     try {
-      if (newLevel === 'Moderador' || newLevel === 'Administrador') {
-        await adminService.promoteUser(userId, newLevel);
-      } else {
-        await adminService.demoteUser(userId, newLevel);
-      }
-      setSuccess(`Nível de usuário alterado com sucesso para ${newLevel}`);
-      await loadUsers();
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao alterar nível do usuário');
-      console.error(err);
+      // Correção: Usando o nome correto da função do serviço
+      await adminService.changeUserLevel(userId, newLevel);
+      toast.success('Nível de usuário alterado com sucesso!');
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u.id === userId ? { ...u, userLevel: newLevel } : u,
+        ),
+      );
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message ||
+          'Erro ao alterar nível do usuário',
+      );
     } finally {
       setProcessing(null);
-      setTimeout(() => setSuccess(''), 3000);
     }
   };
 
-  const handleBlockUser = async (userId: number, blocked: boolean) => {
-    if (userId === currentUser?.id) {
-      setError('Você não pode bloquear sua própria conta');
-      return;
-    }
-
+  const handleToggleUserStatus = async (userId: number, isBlocked: boolean) => {
+    if (processing) return;
     setProcessing(userId);
-    setError('');
-    setSuccess('');
-
     try {
-      if (blocked) {
-        await adminService.blockUser(userId);
-        setSuccess('Usuário bloqueado com sucesso');
-      } else {
-        await adminService.unblockUser(userId);
-        setSuccess('Usuário desbloqueado com sucesso');
-      }
-      await loadUsers();
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao alterar status do usuário');
-      console.error(err);
+      // Correção: Usando o nome correto da função do serviço
+      await adminService.blockUser(userId, !isBlocked);
+      toast.success(
+        `Usuário ${!isBlocked ? 'bloqueado' : 'desbloqueado'} com sucesso!`,
+      );
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u.id === userId ? { ...u, blocked: !isBlocked } : u,
+        ),
+      );
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message ||
+          'Erro ao alterar status do usuário',
+      );
     } finally {
       setProcessing(null);
-      setTimeout(() => setSuccess(''), 3000);
     }
   };
 
-  const getUserLevelIcon = (userLevel: string) => {
-    switch (userLevel) {
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const getLevelIcon = (level: string) => {
+    switch (level) {
       case 'Administrador':
-        return <ShieldCheck className="w-5 h-5 text-red-600" />;
+        return <Shield className="w-4 h-4 text-red-600" />;
       case 'Moderador':
-        return <Shield className="w-5 h-5 text-blue-600" />;
+        return <UserCog className="w-4 h-4 text-blue-600" />;
       default:
-        return <Users className="w-5 h-5 text-gray-600" />;
+        return <User className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getUserLevelBadge = (userLevel: string) => {
-    const badges = {
-      Administrador: 'bg-red-100 text-red-800 border-red-200',
-      Moderador: 'bg-blue-100 text-blue-800 border-blue-200',
-      Usuário: 'bg-gray-100 text-gray-800 border-gray-200',
-    };
-    return badges[userLevel as keyof typeof badges] || badges.Usuário;
-  };
-
-  // Função de filtro
-  const filteredUsers = users.filter((user) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      user.username?.toLowerCase().includes(term) ||
-      user.email?.toLowerCase().includes(term) ||
-      user.nome_completo?.toLowerCase().includes(term)
-    );
-  });
-
-  if (!isAdmin) {
-    return null;
-  }
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.nome_completo &&
+        user.nome_completo.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-lg text-muted-foreground">Carregando usuários...</p>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <p>Carregando usuários...</p>
       </div>
     );
   }
 
+  const getStats = () => {
+    const total = filteredUsers.length;
+    const moderators = filteredUsers.filter(
+      (u) => u.userLevel === 'Moderador',
+    ).length;
+    const admins = filteredUsers.filter(
+      (u) => u.userLevel === 'Administrador',
+    ).length;
+
+    return { total, moderators, admins };
+  };
+
+  const stats = getStats();
+
   return (
-    <div className="min-h-screen py-20">
+    <>
       <Helmet>
-        <title>Painel de Administração - Apostolado Cardeal Newman</title>
+        <title>Painel de Administração - {currentUser?.username}</title>
       </Helmet>
-
-      <div className="container max-w-7xl">
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <ShieldAlert className="w-10 h-10 text-red-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              Painel de Administração
+      <main className="container mx-auto py-10 px-4 md:px-6">
+        <div className="space-y-8">
+          <header className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Gerenciamento de Usuários
             </h1>
-          </div>
-          <div className="h-1 w-20 bg-gradient-to-r from-[hsl(var(--bronze))] via-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] rounded-full mb-4"></div>
-          <p className="text-lg text-muted-foreground">
-            Gerencie usuários, permissões e acesso ao sistema
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-            <div className="text-destructive">{error}</div>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg flex items-start gap-2">
-            <CheckCircle className="w-5 h-5 text-green-800 mt-0.5 flex-shrink-0" />
-            <div className="text-green-800">{success}</div>
-          </div>
-        )}
-
-        {/* Barra de Pesquisa */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Pesquisar por nome, username ou email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base"
-              aria-label="Pesquisar usuários"
-            />
-          </div>
-          {searchTerm && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {filteredUsers.length} usuário(s) encontrado(s)
+            <p className="text-muted-foreground">
+              Visualize, edite e gerencie todos os usuários da plataforma.
             </p>
-          )}
-        </div>
+          </header>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-gray-100">
-                <Users className="w-6 h-6 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total de Usuários</p>
-                <p className="text-2xl font-bold">{filteredUsers.length}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-100">
-                <Shield className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Moderadores</p>
-                <p className="text-2xl font-bold">
-                  {filteredUsers.filter((u) => u.userLevel === 'Moderador').length}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total de Usuários
+                </CardTitle>
+                <User className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <p className="text-xs text-muted-foreground">
+                  (na visualização atual)
                 </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-red-100">
-                <ShieldCheck className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Administradores</p>
-                <p className="text-2xl font-bold">
-                  {filteredUsers.filter((u) => u.userLevel === 'Administrador').length}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Users Table */}
-        <Card className="overflow-hidden">
-          <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Users className="w-6 h-6" />
-              Gerenciar Usuários
-            </h2>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Moderadores
+                </CardTitle>
+                <UserCog className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.moderators}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Administradores
+                </CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.admins}</div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-border">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                    Usuário
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                    Email
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                    Nível de Acesso
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {getUserLevelIcon(user.userLevel)}
-                        <div>
-                          <p className="font-semibold text-foreground">{user.username}</p>
-                          {user.nome_completo && (
-                            <p className="text-sm text-muted-foreground">{user.nome_completo}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={user.userLevel}
-                        onChange={(e) =>
-                          handleChangeUserLevel(
-                            user.id,
-                            e.target.value as 'Usuário' | 'Moderador' | 'Administrador'
-                          )
-                        }
-                        disabled={processing === user.id || user.id === currentUser?.id}
-                        className={`px-3 py-1.5 rounded-full border text-sm font-medium ${getUserLevelBadge(
-                          user.userLevel
-                        )} disabled:opacity-50 disabled:cursor-not-allowed`}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Usuários</CardTitle>
+              <CardDescription>
+                <SearchBar
+                  placeholder="Buscar por nome, username ou e-mail..."
+                  onSearch={setSearchTerm}
+                  className="mt-4"
+                />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Usuário</TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        Nome Completo
+                      </TableHead>
+                      <TableHead>Nível</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow
+                        key={user.id}
+                        className="hover:bg-gray-50 transition-colors"
                       >
-                        <option value="Usuário">Usuário</option>
-                        <option value="Moderador">Moderador</option>
-                        <option value="Administrador">Administrador</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.blocked ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-medium">
-                          <Lock className="w-3 h-3" />
-                          Bloqueado
-                        </span>
-                      ) : user.confirmed ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                          <CheckCircle className="w-3 h-3" />
-                          Ativo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">
-                          Pendente
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Button
-                        onClick={() => handleBlockUser(user.id, !user.blocked)}
-                        disabled={processing === user.id || user.id === currentUser?.id}
-                        size="sm"
-                        variant="outline"
-                        className={
-                          user.blocked
-                            ? 'border-green-600 text-green-600 hover:bg-green-50'
-                            : 'border-red-600 text-red-600 hover:bg-red-50'
-                        }
-                      >
-                        {processing === user.id ? (
-                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                        ) : user.blocked ? (
-                          <Unlock className="w-4 h-4 mr-1" />
-                        ) : (
-                          <Lock className="w-4 h-4 mr-1" />
-                        )}
-                        {user.blocked ? 'Desbloquear' : 'Bloquear'}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        <TableCell>
+                          <div className="font-medium">{user.username}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.email}
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {user.nome_completo}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getLevelIcon(user.userLevel)}
+                            {user.userLevel}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={user.blocked ? 'destructive' : 'default'}
+                          >
+                            {user.blocked ? 'Bloqueado' : 'Ativo'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                disabled={
+                                  processing === user.id ||
+                                  user.id === currentUser?.id
+                                }
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  handleChangeUserLevel(user.id, 'Usuário')
+                                }
+                              >
+                                Tornar Usuário
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  handleChangeUserLevel(user.id, 'Moderador')
+                                }
+                              >
+                                Tornar Moderador
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  handleChangeUserLevel(
+                                    user.id,
+                                    'Administrador',
+                                  )
+                                }
+                              >
+                                Tornar Administrador
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  handleToggleUserStatus(user.id, user.blocked)
+                                }
+                                className={
+                                  user.blocked
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                }
+                              >
+                                {user.blocked ? 'Desbloquear' : 'Bloquear'}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <Card className="mt-8 bg-yellow-50 border-yellow-200">
+          <CardHeader>
+            <CardTitle className="text-yellow-800">
+              Gerenciamento de Conteúdo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-yellow-700">
+              A gestão de artigos e testemunhos pendentes foi movida para o
+              Painel do Moderador para centralizar as tarefas de moderação.
+            </p>
+          </CardContent>
         </Card>
-
-        <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <h3 className="text-sm font-semibold text-yellow-900 mb-2 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            Informações Importantes
-          </h3>
-          <ul className="text-sm text-yellow-800 space-y-2">
-            <li>
-              <strong>Administrador:</strong> Acesso total ao sistema, incluindo gestão de
-              usuários, moderação e configurações.
-            </li>
-            <li>
-              <strong>Moderador:</strong> Pode aprovar/rejeitar testemunhos e artigos
-              submetidos pelos usuários.
-            </li>
-            <li>
-              <strong>Usuário:</strong> Pode submeter artigos e testemunhos para moderação.
-            </li>
-            <li>
-              <strong>Bloqueado:</strong> Usuário bloqueado não pode acessar o sistema.
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

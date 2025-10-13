@@ -1,189 +1,225 @@
+# ================================================================
+# CI/CD Pipeline - Apostolado Cardeal Newman
+# ================================================================
+
 name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  # ==================================
-  # BACKEND TESTS AND BUILD
-  # ==================================
-  backend:
-    name: Backend Build & Test
+  # ================================================================
+  # 1️⃣ LINT – Validação de qualidade de código
+  # ================================================================
+  validate:
+    name: 🔎 Validar Código (ESLint)
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: strapi
-          POSTGRES_PASSWORD: strapi
-          POSTGRES_DB: strapi_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-      - name: Checkout code
+      - name: ⬇️ Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: ⚙️ Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: '**/package-lock.json' # Cache para ambos os projetos
 
-      - name: Install dependencies
+      - name: 📦 Instalar dependências (Raiz/Backend)
         run: npm ci
 
-      - name: Run linter
-        run: npm run lint || true
+      - name: 🚀 Executar ESLint (Raiz/Backend)
+        run: npm run lint -- --max-warnings=0
 
-      - name: Build backend
-        run: npm run build
+  # ================================================================
+  # 2️⃣ BUILD – Backend (Strapi)
+  # ================================================================
+  build-backend:
+    name: 🏗️ Construir Backend (Strapi)
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: ⬇️ Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: package-lock.json # Cache para o backend na raiz
+      
+      - name: 🧹 Limpar Cache do npm
+        run: npm cache clean --force
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      - name: 🛠️ Construir projeto Strapi
         env:
-          DATABASE_CLIENT: postgres
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_NAME: strapi_test
-          DATABASE_USERNAME: strapi
-          DATABASE_PASSWORD: strapi
-          DATABASE_SSL: false
-          JWT_SECRET: test-jwt-secret-key-for-ci
-          API_TOKEN_SALT: test-api-token-salt-for-ci
-          ADMIN_JWT_SECRET: test-admin-jwt-secret-for-ci
-          TRANSFER_TOKEN_SALT: test-transfer-token-salt-for-ci
-          APP_KEYS: test-app-key-1,test-app-key-2
+          NODE_ENV: production
+          DATABASE_CLIENT: ${{ secrets.DATABASE_CLIENT || 'sqlite' }}
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST || '127.0.0.1' }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT || '5432' }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME || 'strapi' }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME || 'strapi' }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD || 'strapi' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-secret' }}
+          ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET || 'test-admin-secret' }}
+          APP_KEYS: ${{ secrets.APP_KEYS || 'test-app-key' }}
+        run: npm run build
 
-      - name: Upload backend build artifacts
+      - name: 📤 Enviar artefato do Backend
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: |
             build/
-            node_modules/
-          retention-days: 1
+            config/
+            database/
+            src/
+            public/
+            package.json
+            package-lock.json
 
-  # ==================================
-  # FRONTEND TESTS AND BUILD
-  # ==================================
-  frontend:
-    name: Frontend Build & Test
+  # ================================================================
+  # 3️⃣ BUILD – Frontend (React + Vite)
+  # ================================================================
+  build-frontend:
+    name: 🎨 Construir Frontend (React)
     runs-on: ubuntu-latest
-
+    needs: validate
     steps:
-      - name: Checkout code
+      - name: ⬇️ Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: ⚙️ Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json # Cache específico para o frontend
 
-      - name: Install dependencies
+      - name: 📦 Instalar dependências
         working-directory: ./frontend
         run: npm ci
 
-      - name: Run linter
+      - name: 🛠️ Construir projeto
         working-directory: ./frontend
-        run: npm run lint || true
-
-      - name: Build frontend
-        working-directory: ./frontend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
-      - name: Upload frontend build artifacts
+      - name: 📤 Enviar artefato do Frontend
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: frontend/dist/
-          retention-days: 1
+          name: frontend-dist
+          path: frontend/dist
 
-  # ==================================
-  # SECURITY SCAN
-  # ==================================
-  security:
-    name: Security Scan
+  # ================================================================
+  # 4️⃣ Segurança (Trivy)
+  # ================================================================
+  security-scan:
+    name: 🛡️ Scan de Segurança (Trivy)
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
-
+    needs: [build-backend, build-frontend]
+    permissions:
+      contents: read # para actions/checkout
+      security-events: write # para github/codeql-action/upload-sarif
     steps:
-      - name: Checkout code
+      - name: ⬇️ Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Run security audit (backend)
-        run: npm audit --audit-level=moderate || true
+      - name: 🧰 Rodar Trivy
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
 
-      - name: Run security audit (frontend)
-        working-directory: ./frontend
-        run: npm audit --audit-level=moderate || true
+      - name: 📤 Enviar resultados de segurança
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
 
-  # ==================================
-  # DEPLOY TO PRODUCTION
-  # ==================================
+  # ================================================================
+  # 5️⃣ Deploy – Envio de artefatos e restart no servidor
+  # ================================================================
   deploy:
-    name: Deploy to Production
+    name: 🚀 Deploy em Produção
     runs-on: ubuntu-latest
-    needs: [backend, frontend, security]
+    needs: security-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download backend artifacts
+      - name: ⬇️ Baixar artefato do Backend
         uses: actions/download-artifact@v4
         with:
           name: backend-build
+          path: backend-build
 
-      - name: Download frontend artifacts
+      - name: ⬇️ Baixar artefato do Frontend
         uses: actions/download-artifact@v4
         with:
-          name: frontend-build
-          path: frontend/dist
+          name: frontend-dist
+          path: frontend-dist
 
-      - name: Deploy to server
+      - name: 📦 Compactar para envio
         run: |
-          echo "🚀 Deployment step"
-          echo "Configure this section with your deployment method:"
-          echo "- SSH deployment"
-          echo "- Docker deployment"
-          echo "- Cloud platform (Heroku, Railway, Render, etc.)"
+          tar -czf backend.tar.gz -C backend-build .
+          tar -czf frontend.tar.gz -C frontend-dist .
 
-      # Example SSH deployment (uncomment and configure):
-      # - name: Deploy via SSH
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.HOST }}
-      #     username: ${{ secrets.USERNAME }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     script: |
-      #       cd /var/www/apostolado
-      #       git pull origin main
-      #       npm install
-      #       npm run build
-      #       pm2 reload apostolado
+      - name: 🚚 Enviar arquivos ao servidor
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: 'backend.tar.gz,frontend.tar.gz'
+          target: '/var/www/apostolado-newman'
 
-  # ==================================
-  # NOTIFY
-  # ==================================
+      - name: ⚙️ Executar script de deploy remoto
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/apostolado-newman
+
+            echo "--- Atualizando Backend ---"
+            tar -xzf backend.tar.gz
+            npm ci --production
+
+            echo "--- Atualizando Frontend ---"
+            rm -rf /var/www/html/apostolado-frontend/*
+            tar -xzf frontend.tar.gz -C /var/www/html/apostolado-frontend
+
+            echo "--- Reiniciando com PM2 ---"
+            pm2 restart apostolado || pm2 start npm --name apostolado -- run start
+
+            echo "--- Deploy finalizado com sucesso! ---"
+
+  # ================================================================
+  # 6️⃣ Notificação Final
+  # ================================================================
   notify:
-    name: Notify Status
+    name: 📣 Notificar Status
     runs-on: ubuntu-latest
-    needs: [deploy]
+    needs: [validate, deploy]
     if: always()
-
     steps:
-      - name: Send notification
+      - name: 💬 Status do Pipeline
         run: |
-          echo "✅ Pipeline completed"
-          echo "Status: ${{ job.status }}"
-          # Configure notifications (Slack, Discord, Email, etc.)
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ Pipeline finalizado com sucesso."
+          else
+            echo "❌ Falha no pipeline: ${{ needs.deploy.result }}"
+          fi
+

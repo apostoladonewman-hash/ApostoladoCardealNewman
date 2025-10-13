@@ -23,7 +23,11 @@ async function runMigration() {
     console.log('✅ Conectado com sucesso!\n');
 
     // Ler o arquivo de migration
-    const migrationPath = path.join(__dirname, 'migrations', '001_add_indexes.sql');
+    const migrationPath = path.join(
+      __dirname,
+      'migrations',
+      '001_add_indexes.sql',
+    );
     console.log(`📄 Lendo migration: ${migrationPath}`);
     const sql = fs.readFileSync(migrationPath, 'utf8');
 
@@ -54,7 +58,6 @@ async function runMigration() {
     });
 
     console.log(`\n✨ Total de índices: ${result.rows.length}`);
-
   } catch (error) {
     console.error('❌ Erro ao executar migration:', error.message);
     console.error(error.stack);

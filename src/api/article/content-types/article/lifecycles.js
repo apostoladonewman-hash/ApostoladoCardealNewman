@@ -1,53 +1,93 @@
+/* global strapi */
+'use strict';
+
 const emailService = require('../../../../services/emailNotification');
 
+/**
+ * Lifecycle callbacks for the `article` content-type.
+ */
 module.exports = {
   async afterUpdate(event) {
-    const { result, params } = event;
+    const { result, params, state } = event;
 
-    // Verificar se o status mudou para approved ou rejected
-    if (params.data.status && result) {
-      const articleId = result.id;
+    // Confere se a atualização foi nos dados e se há um resultado
+    if (params.data && result) {
+      const statusMudou = params.data.status;
+      const statusAprovado = statusMudou === 'approved';
+      const statusRejeitado = statusMudou === 'rejected';
 
-      // Buscar dados completos do article com usuário vinculado
-      const article = await strapi.entityService.findOne('api::article.article', articleId, {
-        populate: ['usuario_vinculado'],
-      });
+      // Executa a lógica apenas se o status foi alterado para 'approved' ou 'rejected'
+      if (statusAprovado || statusRejeitado) {
+        const articleId = result.id;
 
-      if (!article || !article.usuario_vinculado) {
-        return;
-      }
+        // Busca o artigo completo com a população do usuário vinculado
+        const article = await strapi.entityService.findOne(
+          'api::article.article',
+          articleId,
+          {
+            populate: ['usuario_vinculado'],
+          },
+        );
 
-      const user = article.usuario_vinculado;
-      const userEmail = user.email;
-      const userName = user.username || user.nome_completo || 'Usuário';
-      const articleTitle = article.titulo || 'Seu artigo';
-
-      // Enviar email baseado no status
-      if (params.data.status === 'approved') {
-        await emailService.sendArticleApproved(userEmail, userName, articleTitle, articleId);
-
-        // Criar log de moderação
-        if (event.state && event.state.user) {
-          await strapi.service('api::moderation-log.moderation-log').createLog({
-            action: 'approved',
-            contentType: 'article',
-            contentId: articleId,
-            moderatorId: event.state.user.id,
-          });
+        // Garante que o artigo e o usuário vinculado existem antes de prosseguir
+        if (!article || !article.usuario_vinculado) {
+          strapi.log.warn(
+            `Artigo ${articleId} ou seu usuário vinculado não encontrado para notificação.`,
+          );
+          return;
         }
-      } else if (params.data.status === 'rejected') {
-        const reason = params.data.motivo_rejeicao || 'Não especificado';
-        await emailService.sendArticleRejected(userEmail, userName, articleTitle, reason);
 
-        // Criar log de moderação
-        if (event.state && event.state.user) {
-          await strapi.service('api::moderation-log.moderation-log').createLog({
-            action: 'rejected',
-            contentType: 'article',
-            contentId: articleId,
-            moderatorId: event.state.user.id,
-            reason,
-          });
+        const user = article.usuario_vinculado;
+        const userEmail = user.email;
+        const userName = user.username || user.nome_completo || 'Usuário';
+        const articleTitle = article.titulo || 'Seu artigo';
+
+        try {
+          // Lógica de envio de email e criação de log
+          if (statusAprovado) {
+            await emailService.sendArticleApproved(
+              userEmail,
+              userName,
+              articleTitle,
+              articleId,
+            );
+
+            if (state && state.user) {
+              await strapi
+                .service('api::moderation-log.moderation-log')
+                .createLog({
+                  action: 'approved',
+                  contentType: 'article',
+                  contentId: articleId,
+                  moderatorId: state.user.id,
+                });
+            }
+          } else if (statusRejeitado) {
+            const reason = params.data.motivo_rejeicao || 'Não especificado';
+            await emailService.sendArticleRejected(
+              userEmail,
+              userName,
+              articleTitle,
+              reason,
+            );
+
+            if (state && state.user) {
+              await strapi
+                .service('api::moderation-log.moderation-log')
+                .createLog({
+                  action: 'rejected',
+                  contentType: 'article',
+                  contentId: articleId,
+                  moderatorId: state.user.id,
+                  reason,
+                });
+            }
+          }
+        } catch (error) {
+          strapi.log.error(
+            `Erro ao processar afterUpdate para o artigo ${articleId}:`,
+            error,
+          );
         }
       }
     }

@@ -1,5 +1,10 @@
 import { api, buildStrapiQuery } from './api';
-import type { StrapiResponse, StrapiSingleResponse, Article, QueryParams } from '@/types/strapi';
+import type {
+  StrapiResponse,
+  StrapiSingleResponse,
+  Article,
+  QueryParams,
+} from '@/types/strapi';
 
 export const articlesService = {
   /**
@@ -7,7 +12,9 @@ export const articlesService = {
    */
   async getAll(params?: QueryParams): Promise<StrapiResponse<Article>> {
     const query = buildStrapiQuery(params);
-    const { data } = await api.get<StrapiResponse<Article>>('/articles', { params: query });
+    const { data } = await api.get<StrapiResponse<Article>>('/articles', {
+      params: query,
+    });
     return data;
   },
 
@@ -20,7 +27,9 @@ export const articlesService = {
       populate: ['author', 'category', 'cover', 'blocks'],
     });
 
-    const { data } = await api.get<StrapiResponse<Article>>('/articles', { params: query });
+    const { data } = await api.get<StrapiResponse<Article>>('/articles', {
+      params: query,
+    });
     return data.data[0] || null;
   },
 
@@ -28,18 +37,24 @@ export const articlesService = {
    * Buscar artigo por ID
    */
   async getById(id: string): Promise<Article> {
-    const { data } = await api.get<StrapiSingleResponse<Article>>(`/articles/${id}`, {
-      params: buildStrapiQuery({
-        populate: ['author', 'category', 'cover', 'blocks'],
-      }),
-    });
+    const { data } = await api.get<StrapiSingleResponse<Article>>(
+      `/articles/${id}`,
+      {
+        params: buildStrapiQuery({
+          populate: ['author', 'category', 'cover', 'blocks'],
+        }),
+      },
+    );
     return data.data;
   },
 
   /**
    * Buscar artigos por categoria
    */
-  async getByCategory(categorySlug: string, params?: QueryParams): Promise<StrapiResponse<Article>> {
+  async getByCategory(
+    categorySlug: string,
+    params?: QueryParams,
+  ): Promise<StrapiResponse<Article>> {
     const query = buildStrapiQuery({
       ...params,
       filters: {
@@ -49,7 +64,9 @@ export const articlesService = {
       populate: ['author', 'category', 'cover'],
     });
 
-    const { data } = await api.get<StrapiResponse<Article>>('/articles', { params: query });
+    const { data } = await api.get<StrapiResponse<Article>>('/articles', {
+      params: query,
+    });
     return data;
   },
 
@@ -62,10 +79,10 @@ export const articlesService = {
       sort: ['publishedAt:desc'],
       populate: {
         author: {
-          populate: ['avatar']
+          populate: ['avatar'],
         },
         category: true,
-        cover: true
+        cover: true,
       },
     });
     return data;

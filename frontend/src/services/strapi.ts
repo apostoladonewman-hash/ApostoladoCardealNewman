@@ -5,10 +5,10 @@ export const strapiService = {
     const response = await api.get('/authors', {
       params: {
         populate: {
-          avatar: true
+          avatar: true,
         },
-        sort: ['publishedAt:desc']
-      }
+        sort: ['publishedAt:desc'],
+      },
     });
     return response.data.data;
   },
@@ -18,13 +18,13 @@ export const strapiService = {
       params: {
         populate: {
           autor: {
-            populate: ['foto']
+            populate: ['foto'],
           },
-          categoria: true
+          categoria: true,
         },
-        sort: ['publishedAt:desc']
-      }
+        sort: ['publishedAt:desc'],
+      },
     });
     return response.data.data;
-  }
+  },
 };

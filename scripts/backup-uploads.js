@@ -43,7 +43,7 @@ async function createBackup() {
   console.log(`Source: ${UPLOADS_DIR}`);
 
   // Check if uploads directory exists
-  if (!await fs.pathExists(UPLOADS_DIR)) {
+  if (!(await fs.pathExists(UPLOADS_DIR))) {
     console.log('⚠️  No uploads directory found, skipping backup');
     return null;
   }
@@ -51,7 +51,7 @@ async function createBackup() {
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(filepath);
     const archive = archiver('zip', {
-      zlib: { level: 9 } // Maximum compression
+      zlib: { level: 9 }, // Maximum compression
     });
 
     output.on('close', () => {
@@ -105,7 +105,9 @@ async function cleanOldBackups() {
     }
     console.log(`✓ Removed ${toDelete.length} old backup(s)`);
   } else {
-    console.log(`✓ No old backups to remove (${backupFiles.length}/${MAX_BACKUPS})`);
+    console.log(
+      `✓ No old backups to remove (${backupFiles.length}/${MAX_BACKUPS})`,
+    );
   }
 }
 

@@ -11,16 +11,21 @@ import { Heart, MapPin, Briefcase, ArrowRight } from 'lucide-react';
 export default function Testemunhos() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: response, isLoading, error } = useAuthors({
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useAuthors({
     filters: {
-      testemunho_completo: { $notNull: true }
+      testemunho_completo: { $notNull: true },
     },
     populate: {
-      avatar: true
+      avatar: true,
     },
-    sort: ['publishedAt:desc']
+    sort: ['publishedAt:desc'],
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allTestimonies = response?.data || [];
 
   // Filtrar testemunhos baseado na pesquisa
@@ -28,13 +33,14 @@ export default function Testemunhos() {
     if (!searchQuery.trim()) return allTestimonies;
 
     const query = searchQuery.toLowerCase();
-    return allTestimonies.filter(author =>
-      author.nome_pessoa.toLowerCase().includes(query) ||
-      author.denominacao_anterior?.toLowerCase().includes(query) ||
-      author.cidade_atual?.toLowerCase().includes(query) ||
-      author.profissao?.toLowerCase().includes(query) ||
-      author.biografia?.toLowerCase().includes(query) ||
-      author.testemunho_completo?.toLowerCase().includes(query)
+    return allTestimonies.filter(
+      (author) =>
+        author.nome_pessoa.toLowerCase().includes(query) ||
+        author.denominacao_anterior?.toLowerCase().includes(query) ||
+        author.cidade_atual?.toLowerCase().includes(query) ||
+        author.profissao?.toLowerCase().includes(query) ||
+        author.biografia?.toLowerCase().includes(query) ||
+        author.testemunho_completo?.toLowerCase().includes(query),
     );
   }, [allTestimonies, searchQuery]);
 
@@ -50,7 +56,10 @@ export default function Testemunhos() {
     <>
       <Helmet>
         <title>Testemunhos de Conversão — Apostolado Cardeal Newman</title>
-        <meta name="description" content="Histórias reais de conversão ao catolicismo. Testemunhos autênticos de fé e transformação." />
+        <meta
+          name="description"
+          content="Histórias reais de conversão ao catolicismo. Testemunhos autênticos de fé e transformação."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/[0.02] to-background">
@@ -62,7 +71,9 @@ export default function Testemunhos() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <Heart className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Histórias Reais de Conversão</span>
+                <span className="text-sm font-medium text-primary">
+                  Histórias Reais de Conversão
+                </span>
               </div>
 
               {/* Title */}
@@ -72,7 +83,8 @@ export default function Testemunhos() {
 
               {/* Description */}
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Conheça as jornadas de conversão de protestantes que encontraram a plenitude da fé na Igreja Católica
+                Conheça as jornadas de conversão de protestantes que encontraram
+                a plenitude da fé na Igreja Católica
               </p>
 
               {/* Search Bar */}
@@ -109,7 +121,9 @@ export default function Testemunhos() {
                   <Heart className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {searchQuery ? 'Nenhum testemunho encontrado' : 'Nenhum testemunho disponível'}
+                  {searchQuery
+                    ? 'Nenhum testemunho encontrado'
+                    : 'Nenhum testemunho disponível'}
                 </h3>
                 <p className="text-muted-foreground">
                   {searchQuery
@@ -121,7 +135,10 @@ export default function Testemunhos() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredTestimonies.map((author) => {
                   const photoUrl = author.avatar?.url;
-                  const excerpt = author.biografia || author.testemunho_completo?.substring(0, 180) || 'Testemunho de conversão à Igreja Católica';
+                  const excerpt =
+                    author.biografia ||
+                    author.testemunho_completo?.substring(0, 180) ||
+                    'Testemunho de conversão à Igreja Católica';
 
                   return (
                     <Link

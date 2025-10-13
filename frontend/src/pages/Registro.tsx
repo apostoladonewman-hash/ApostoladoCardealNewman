@@ -6,6 +6,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { validatePassword } from '@/utils/password-validation';
+import { AxiosError } from 'axios';
+
+// Interface para a estrutura esperada do erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -16,12 +24,12 @@ export default function Registro() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: ''
+    password: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +39,10 @@ export default function Registro() {
     // Validar senha antes de enviar
     const passwordValidation = validatePassword(formData.password);
     if (!passwordValidation.valid) {
-      setError(passwordValidation.message || 'Senha não atende aos requisitos de segurança');
+      setError(
+        passwordValidation.message ||
+          'Senha não atende aos requisitos de segurança',
+      );
       return;
     }
 
@@ -40,8 +51,15 @@ export default function Registro() {
     try {
       await register(formData);
       navigate('/perfil');
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.message || 'Erro ao registrar. Tente novamente.');
+    } catch (err) {
+      let errorMessage = 'Erro ao registrar. Tente novamente.';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,7 +147,10 @@ export default function Registro() {
 
             <p className="text-center text-sm text-muted-foreground">
               Já tem uma conta?{' '}
-              <Link to="/login" className="text-primary font-semibold hover:underline">
+              <Link
+                to="/login"
+                className="text-primary font-semibold hover:underline"
+              >
                 Fazer Login
               </Link>
             </p>

@@ -7,6 +7,14 @@ import articleSubmissionService from '@/services/articleSubmissionService';
 import categoriesService from '@/services/categories';
 import { Send, Upload, Loader2 } from 'lucide-react';
 import type { Category } from '@/types/strapi';
+import { AxiosError } from 'axios';
+
+// Interface para a estrutura esperada do erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function SubmeterArtigo() {
   const navigate = useNavigate();
@@ -42,7 +50,9 @@ export default function SubmeterArtigo() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -87,7 +97,8 @@ export default function SubmeterArtigo() {
         status: 'pending' as const,
       };
 
-      const response = await articleSubmissionService.submitArticle(dataToSubmit);
+      const response =
+        await articleSubmissionService.submitArticle(dataToSubmit);
 
       // Upload cover image if provided
       if (coverFile && response.id) {
@@ -110,10 +121,15 @@ export default function SubmeterArtigo() {
       setTimeout(() => {
         navigate('/meus-artigos');
       }, 2000);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || 'Erro ao enviar artigo. Tente novamente.'
-      );
+    } catch (err) {
+      let errorMessage = 'Erro ao enviar artigo. Tente novamente.';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setLoading(false);
@@ -243,7 +259,9 @@ export default function SubmeterArtigo() {
                 <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg hover:border-primary cursor-pointer transition-colors">
                   <Upload className="w-5 h-5 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {coverFile ? 'Alterar imagem' : 'Escolher imagem de capa (opcional)'}
+                    {coverFile
+                      ? 'Alterar imagem'
+                      : 'Escolher imagem de capa (opcional)'}
                   </span>
                   <input
                     type="file"
@@ -281,8 +299,9 @@ export default function SubmeterArtigo() {
                 Informação Importante
               </h3>
               <p className="text-sm text-blue-800">
-                Seu artigo será enviado para moderação e será revisado por nossa equipe
-                antes de ser publicado. Você pode acompanhar o status em "Meus Artigos".
+                Seu artigo será enviado para moderação e será revisado por nossa
+                equipe antes de ser publicado. Você pode acompanhar o status em
+                &quot;Meus Artigos&quot;.
               </p>
             </div>
 

@@ -11,16 +11,21 @@ import { BookOpen, Calendar, User } from 'lucide-react';
 export default function Artigos() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: response, isLoading, error } = useArticles({
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useArticles({
     populate: {
       author: {
-        populate: ['avatar']
+        populate: ['avatar'],
       },
-      category: true
+      category: true,
     },
-    sort: ['publishedAt:desc']
+    sort: ['publishedAt:desc'],
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allArticles = response?.data || [];
 
   // Filtrar artigos baseado na pesquisa
@@ -28,11 +33,12 @@ export default function Artigos() {
     if (!searchQuery.trim()) return allArticles;
 
     const query = searchQuery.toLowerCase();
-    return allArticles.filter(article =>
-      article.title.toLowerCase().includes(query) ||
-      article.description.toLowerCase().includes(query) ||
-      article.author?.nome_pessoa.toLowerCase().includes(query) ||
-      article.category?.name.toLowerCase().includes(query)
+    return allArticles.filter(
+      (article) =>
+        article.title.toLowerCase().includes(query) ||
+        article.description.toLowerCase().includes(query) ||
+        article.author?.nome_pessoa.toLowerCase().includes(query) ||
+        article.category?.name.toLowerCase().includes(query),
     );
   }, [allArticles, searchQuery]);
 
@@ -48,7 +54,10 @@ export default function Artigos() {
     <>
       <Helmet>
         <title>Artigos — Apostolado Cardeal Newman</title>
-        <meta name="description" content="Explore artigos, reflexões e estudos profundos sobre a fé católica." />
+        <meta
+          name="description"
+          content="Explore artigos, reflexões e estudos profundos sobre a fé católica."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/[0.02] to-background">
@@ -60,7 +69,9 @@ export default function Artigos() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Biblioteca de Artigos</span>
+                <span className="text-sm font-medium text-primary">
+                  Biblioteca de Artigos
+                </span>
               </div>
 
               {/* Title */}
@@ -70,7 +81,8 @@ export default function Artigos() {
 
               {/* Description */}
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Reflexões, estudos e aprofundamentos sobre a fé católica por autores dedicados à verdade
+                Reflexões, estudos e aprofundamentos sobre a fé católica por
+                autores dedicados à verdade
               </p>
 
               {/* Search Bar */}
@@ -107,7 +119,9 @@ export default function Artigos() {
                   <BookOpen className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {searchQuery ? 'Nenhum artigo encontrado' : 'Nenhum artigo disponível'}
+                  {searchQuery
+                    ? 'Nenhum artigo encontrado'
+                    : 'Nenhum artigo disponível'}
                 </h3>
                 <p className="text-muted-foreground">
                   {searchQuery
@@ -122,11 +136,14 @@ export default function Artigos() {
                   const category = article.category;
                   const photoUrl = author?.avatar?.url;
                   const publishDate = article.publishedAt
-                    ? new Date(article.publishedAt).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                      })
+                    ? new Date(article.publishedAt).toLocaleDateString(
+                        'pt-BR',
+                        {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        },
+                      )
                     : '';
 
                   return (
@@ -190,7 +207,9 @@ export default function Artigos() {
                           {/* Read More */}
                           <div className="flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all pt-2">
                             <span>Ler artigo</span>
-                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                            <span className="group-hover:translate-x-1 transition-transform">
+                              →
+                            </span>
                           </div>
                         </div>
                       </Card>

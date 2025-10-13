@@ -1,5 +1,10 @@
 import { api, buildStrapiQuery } from './api';
-import type { StrapiResponse, StrapiSingleResponse, Author, QueryParams } from '@/types/strapi';
+import type {
+  StrapiResponse,
+  StrapiSingleResponse,
+  Author,
+  QueryParams,
+} from '@/types/strapi';
 
 export const authorsService = {
   /**
@@ -7,7 +12,9 @@ export const authorsService = {
    */
   async getAll(params?: QueryParams): Promise<StrapiResponse<Author>> {
     const query = buildStrapiQuery(params);
-    const { data } = await api.get<StrapiResponse<Author>>('/authors', { params: query });
+    const { data } = await api.get<StrapiResponse<Author>>('/authors', {
+      params: query,
+    });
     return data;
   },
 
@@ -20,7 +27,9 @@ export const authorsService = {
       populate: ['avatar'],
     });
 
-    const { data } = await api.get<StrapiResponse<Author>>('/authors', { params: query });
+    const { data } = await api.get<StrapiResponse<Author>>('/authors', {
+      params: query,
+    });
     return data.data[0] || null;
   },
 
@@ -28,11 +37,14 @@ export const authorsService = {
    * Buscar autor por ID
    */
   async getById(id: string): Promise<Author> {
-    const { data } = await api.get<StrapiSingleResponse<Author>>(`/authors/${id}`, {
-      params: buildStrapiQuery({
-        populate: ['avatar'],
-      }),
-    });
+    const { data } = await api.get<StrapiSingleResponse<Author>>(
+      `/authors/${id}`,
+      {
+        params: buildStrapiQuery({
+          populate: ['avatar'],
+        }),
+      },
+    );
     return data.data;
   },
 
@@ -49,7 +61,9 @@ export const authorsService = {
       populate: ['avatar'],
     });
 
-    const { data } = await api.get<StrapiResponse<Author>>('/authors', { params: query });
+    const { data } = await api.get<StrapiResponse<Author>>('/authors', {
+      params: query,
+    });
     return data.data;
   },
 };

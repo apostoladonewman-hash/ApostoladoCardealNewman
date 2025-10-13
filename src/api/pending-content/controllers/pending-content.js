@@ -1,22 +1,32 @@
+/* global strapi */
+'use strict';
+
 module.exports = {
   async create(ctx) {
     const user = ctx.state.user;
 
     if (!user) {
-      return ctx.unauthorized('Você precisa estar autenticado para criar conteúdo.');
+      return ctx.unauthorized(
+        'Você precisa estar autenticado para criar conteúdo.',
+      );
     }
 
     // Verificar se o usuário tem permissão para contribuir
     if (!user.pode_contribuir && user.role.type !== 'admin') {
-      return ctx.forbidden('Você não tem permissão para contribuir com conteúdo.');
+      return ctx.forbidden(
+        'Você não tem permissão para contribuir com conteúdo.',
+      );
     }
 
     try {
-      const { tipo_conteudo, titulo, conteudo, categoria } = ctx.request.body.data;
+      const { tipo_conteudo, titulo, conteudo, categoria } =
+        ctx.request.body.data;
 
       // Validar dados obrigatórios
       if (!tipo_conteudo || !titulo || !conteudo) {
-        return ctx.badRequest('Campos obrigatórios: tipo_conteudo, titulo, conteudo');
+        return ctx.badRequest(
+          'Campos obrigatórios: tipo_conteudo, titulo, conteudo',
+        );
       }
 
       // Validar tipo de conteúdo
@@ -42,14 +52,14 @@ module.exports = {
             autor_contribuidor: user.id,
             status_aprovacao: 'pending',
             data_submissao: new Date(),
-            publishedAt: new Date()
-          }
-        }
+            publishedAt: new Date(),
+          },
+        },
       );
 
       return ctx.send({
         data: pendingContent,
-        message: 'Conteúdo enviado para aprovação com sucesso!'
+        message: 'Conteúdo enviado para aprovação com sucesso!',
       });
     } catch (error) {
       return ctx.badRequest('Erro ao criar conteúdo pendente', { error });
@@ -69,8 +79,8 @@ module.exports = {
         'api::pending-content.pending-content',
         id,
         {
-          populate: ['categoria', 'autor_contribuidor']
-        }
+          populate: ['categoria', 'autor_contribuidor'],
+        },
       );
 
       if (!pendingContent) {
@@ -83,7 +93,7 @@ module.exports = {
           title: pendingContent.titulo,
           content: pendingContent.conteudo,
           user: pendingContent.autor_contribuidor?.id,
-          publishedAt: new Date()
+          publishedAt: new Date(),
         };
 
         // Adicionar categoria apenas se existir
@@ -93,12 +103,16 @@ module.exports = {
 
         // Adicionar author apenas se existir
         if (pendingContent.autor_contribuidor?.autor_vinculado?.id) {
-          articleData.author = pendingContent.autor_contribuidor.autor_vinculado.id;
+          articleData.author =
+            pendingContent.autor_contribuidor.autor_vinculado.id;
         }
 
-        const newArticle = await strapi.entityService.create('api::article.article', {
-          data: articleData
-        });
+        const newArticle = await strapi.entityService.create(
+          'api::article.article',
+          {
+            data: articleData,
+          },
+        );
 
         // Atualizar o status do conteúdo pendente
         await strapi.entityService.update(
@@ -108,14 +122,14 @@ module.exports = {
             data: {
               status_aprovacao: 'approved',
               aprovado_por: user.id,
-              data_aprovacao: new Date()
-            }
-          }
+              data_aprovacao: new Date(),
+            },
+          },
         );
 
         return ctx.send({
           data: newArticle,
-          message: 'Conteúdo aprovado e publicado com sucesso!'
+          message: 'Conteúdo aprovado e publicado com sucesso!',
         });
       }
 
@@ -143,14 +157,14 @@ module.exports = {
             status_aprovacao: 'rejected',
             motivo_rejeicao,
             aprovado_por: user.id,
-            data_aprovacao: new Date()
-          }
-        }
+            data_aprovacao: new Date(),
+          },
+        },
       );
 
       return ctx.send({
         data: updatedContent,
-        message: 'Conteúdo rejeitado com sucesso!'
+        message: 'Conteúdo rejeitado com sucesso!',
       });
     } catch (error) {
       return ctx.badRequest('Erro ao rejeitar conteúdo', { error });
@@ -161,7 +175,9 @@ module.exports = {
     const user = ctx.state.user;
 
     if (!user || user.role.type !== 'admin') {
-      return ctx.forbidden('Apenas administradores podem ver conteúdos pendentes.');
+      return ctx.forbidden(
+        'Apenas administradores podem ver conteúdos pendentes.',
+      );
     }
 
     try {
@@ -169,16 +185,16 @@ module.exports = {
         'api::pending-content.pending-content',
         {
           filters: {
-            status_aprovacao: 'pending'
+            status_aprovacao: 'pending',
           },
           populate: ['autor_contribuidor', 'categoria'],
-          sort: { data_submissao: 'desc' }
-        }
+          sort: { data_submissao: 'desc' },
+        },
       );
 
       return ctx.send({ data: pendingContents });
     } catch (error) {
       return ctx.badRequest('Erro ao buscar conteúdos pendentes', { error });
     }
-  }
+  },
 };

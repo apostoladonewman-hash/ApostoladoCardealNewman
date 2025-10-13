@@ -1,5 +1,16 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService, User, LoginCredentials, RegisterData } from '@/services/auth';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
+import {
+  authService,
+  User,
+  LoginCredentials,
+  RegisterData,
+} from '@/services/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -83,3 +94,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export type { LoginCredentials };

@@ -4,7 +4,8 @@ interface ErrorMessageProps {
 }
 
 export const ErrorMessage = ({ error, message }: ErrorMessageProps) => {
-  const displayMessage = message || error?.message || 'Ocorreu um erro ao carregar os dados.';
+  const displayMessage =
+    message || error?.message || 'Ocorreu um erro ao carregar os dados.';
 
   return (
     <div className="flex items-center justify-center min-h-[400px]">

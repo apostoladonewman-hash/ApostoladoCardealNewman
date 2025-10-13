@@ -1,21 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import { newmanService } from '@/services/newman';
+import { newmanService, NewmanCategory } from '@/services/newman';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { Card } from '@/components/ui/card';
 import { Tabs } from '@/components/ui/tabs';
 import cardealNewmanImg from '@/assets/cardeal_newman.png';
-import { BookOpen, Quote, Award, Calendar, Book, Users, Library, Heart } from 'lucide-react';
+import {
+  BookOpen,
+  Quote,
+  Award,
+  Calendar,
+  Book,
+  Users,
+  Library,
+  Heart,
+} from 'lucide-react';
 
 export default function Newman() {
-  const { data: newman, isLoading, error } = useQuery({
+  const {
+    data: newman,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['newman'],
     queryFn: () => newmanService.get(),
   });
 
   const photoUrl = newman?.photo?.url
-    ? `http://localhost:1337${newman.photo.url}`
+    ? `${import.meta.env.VITE_MEDIA_URL}${newman.photo.url}`
     : cardealNewmanImg;
 
   if (isLoading) {
@@ -30,7 +43,10 @@ export default function Newman() {
     <>
       <Helmet>
         <title>São João Henrique Newman — Apostolado Cardeal Newman</title>
-        <meta name="description" content="Conheça a vida, obra e legado de São João Henrique Newman, patrono e inspiração do nosso apostolado." />
+        <meta
+          name="description"
+          content="Conheça a vida, obra e legado de São João Henrique Newman, patrono e inspiração do nosso apostolado."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/[0.02] to-background">
@@ -42,7 +58,9 @@ export default function Newman() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <Award className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Santo Padroeiro</span>
+                <span className="text-sm font-medium text-primary">
+                  Santo Padroeiro
+                </span>
               </div>
 
               {/* Title */}
@@ -55,7 +73,8 @@ export default function Newman() {
                 <div className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span className="text-lg">
-                    {newman?.birthDate?.split(' ').pop()} - {newman?.deathDate?.split(' ').pop()}
+                    {newman?.birthDate?.split(' ').pop()} -{' '}
+                    {newman?.deathDate?.split(' ').pop()}
                   </span>
                 </div>
               )}
@@ -90,7 +109,9 @@ export default function Newman() {
                 <Card className="p-8 border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl h-full">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Biografia</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      Biografia
+                    </h2>
                   </div>
                   {newman?.biography ? (
                     <div
@@ -99,9 +120,10 @@ export default function Newman() {
                     />
                   ) : (
                     <p className="text-lg text-muted-foreground leading-relaxed">
-                      São João Henrique Newman foi um teólogo, poeta e cardeal católico inglês,
-                      canonizado em 2019. Sua jornada de conversão do anglicanismo ao catolicismo
-                      inspirou muitos ao longo dos séculos.
+                      São João Henrique Newman foi um teólogo, poeta e cardeal
+                      católico inglês, canonizado em 2019. Sua jornada de
+                      conversão do anglicanismo ao catolicismo inspirou muitos
+                      ao longo dos séculos.
                     </p>
                   )}
                 </Card>
@@ -113,7 +135,9 @@ export default function Newman() {
               <Card className="p-8 md:p-10 border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">Legado e Canonização</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                    Legado e Canonização
+                  </h2>
                 </div>
                 <div
                   className="prose prose-lg max-w-none prose-p:text-muted-foreground prose-p:leading-relaxed"
@@ -127,7 +151,9 @@ export default function Newman() {
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">Principais Obras</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                    Principais Obras
+                  </h2>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -164,7 +190,9 @@ export default function Newman() {
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">Citações Memoráveis</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                    Citações Memoráveis
+                  </h2>
                 </div>
 
                 <div className="space-y-6">
@@ -177,7 +205,7 @@ export default function Newman() {
                         <Quote className="w-8 h-8 text-primary flex-shrink-0 opacity-50" />
                         <div className="flex-1">
                           <p className="text-lg md:text-xl italic text-foreground leading-relaxed mb-4">
-                            "{quote.text}"
+                            &quot;{quote.text}&quot;
                           </p>
                           <footer className="text-sm text-muted-foreground font-medium">
                             — {quote.author}
@@ -195,12 +223,14 @@ export default function Newman() {
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">Explore Mais Sobre Newman</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                    Explore Mais Sobre Newman
+                  </h2>
                 </div>
 
                 <Card className="p-6 md:p-8 border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl">
                   <Tabs
-                    tabs={newman.categories.map((category: any) => ({
+                    tabs={newman.categories.map((category: NewmanCategory) => ({
                       slug: category.slug,
                       title: category.title,
                       description: category.description,
@@ -210,7 +240,9 @@ export default function Newman() {
                           {category.content ? (
                             <div
                               className="prose prose-lg max-w-none prose-p:text-muted-foreground prose-p:leading-relaxed"
-                              dangerouslySetInnerHTML={{ __html: category.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: category.content,
+                              }}
                             />
                           ) : (
                             <div className="text-center py-12">
@@ -221,7 +253,9 @@ export default function Newman() {
                                 Conteúdo em breve
                               </h3>
                               <p className="text-muted-foreground max-w-md mx-auto">
-                                Estamos trabalhando para disponibilizar conteúdo sobre {category.title.toLowerCase()}. Volte em breve!
+                                Estamos trabalhando para disponibilizar conteúdo
+                                sobre {category.title.toLowerCase()}. Volte em
+                                breve!
                               </p>
                             </div>
                           )}

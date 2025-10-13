@@ -6,8 +6,8 @@ module.exports = {
       handler: 'pending-content.findPending',
       config: {
         policies: [],
-        middlewares: []
-      }
+        middlewares: [],
+      },
     },
     {
       method: 'POST',
@@ -15,8 +15,8 @@ module.exports = {
       handler: 'pending-content.create',
       config: {
         policies: [],
-        middlewares: []
-      }
+        middlewares: [],
+      },
     },
     {
       method: 'PUT',
@@ -24,8 +24,8 @@ module.exports = {
       handler: 'pending-content.approve',
       config: {
         policies: [],
-        middlewares: []
-      }
+        middlewares: [],
+      },
     },
     {
       method: 'PUT',
@@ -33,8 +33,8 @@ module.exports = {
       handler: 'pending-content.reject',
       config: {
         policies: [],
-        middlewares: []
-      }
-    }
-  ]
+        middlewares: [],
+      },
+    },
+  ],
 };

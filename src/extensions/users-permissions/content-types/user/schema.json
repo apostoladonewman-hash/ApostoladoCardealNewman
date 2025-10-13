@@ -9,9 +9,9 @@
     "displayName": "User"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": false,
+    "timestamps": true
   },
-  "pluginOptions": {},
   "attributes": {
     "username": {
       "type": "string",
@@ -32,22 +32,19 @@
     },
     "password": {
       "type": "password",
-      "minLength": 8,
+      "minLength": 6,
       "configurable": false,
-      "private": true,
-      "searchable": false
+      "private": true
     },
     "resetPasswordToken": {
       "type": "string",
       "configurable": false,
-      "private": true,
-      "searchable": false
+      "private": true
     },
     "confirmationToken": {
       "type": "string",
       "configurable": false,
-      "private": true,
-      "searchable": false
+      "private": true
     },
     "confirmed": {
       "type": "boolean",
@@ -66,18 +63,8 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "id_usuario": {
-      "type": "uid"
-    },
-    "postagens": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::article.article",
-      "mappedBy": "user"
-    },
     "nome_completo": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "foto_perfil": {
       "type": "media",
@@ -94,39 +81,21 @@
     "profissao": {
       "type": "string"
     },
-    "testemunho_breve": {
-      "type": "text"
-    },
     "ex_protestante": {
       "type": "boolean",
       "default": false
+    },
+    "pode_contribuir": {
+      "type": "boolean",
+      "default": true
     },
     "autor_vinculado": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::author.author"
     },
-    "pode_contribuir": {
-      "type": "boolean",
-      "default": false
-    },
-    "userLevel": {
-      "type": "enumeration",
-      "enum": ["Usuário", "Moderador", "Administrador"],
-      "default": "Usuário",
-      "required": true
-    },
-    "telefone": {
+    "user_level": {
       "type": "string"
-    },
-    "twoFactorSecret": {
-      "type": "string",
-      "private": true,
-      "searchable": false
-    },
-    "twoFactorEnabled": {
-      "type": "boolean",
-      "default": false
     }
   }
 }

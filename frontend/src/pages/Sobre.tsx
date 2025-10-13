@@ -7,7 +7,11 @@ import { Card } from '@/components/ui/card';
 import { Heart, Target, CheckCircle, Users } from 'lucide-react';
 
 export default function Sobre() {
-  const { data: about, isLoading, error } = useQuery({
+  const {
+    data: about,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['about'],
     queryFn: () => aboutService.get(),
   });
@@ -24,7 +28,10 @@ export default function Sobre() {
     <>
       <Helmet>
         <title>Sobre Nós — Apostolado Cardeal Newman</title>
-        <meta name="description" content="Conheça a missão, visão e valores do Apostolado Cardeal Newman, dedicado a compartilhar testemunhos de conversão ao catolicismo." />
+        <meta
+          name="description"
+          content="Conheça a missão, visão e valores do Apostolado Cardeal Newman, dedicado a compartilhar testemunhos de conversão ao catolicismo."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/[0.02] to-background">
@@ -36,7 +43,9 @@ export default function Sobre() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <Heart className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Nossa História</span>
+                <span className="text-sm font-medium text-primary">
+                  Nossa História
+                </span>
               </div>
 
               {/* Title */}
@@ -48,7 +57,7 @@ export default function Sobre() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent"></div>
                 <p className="relative text-xl md:text-2xl italic text-muted-foreground py-6">
-                  "Cor ad cor loquitur"
+                  &quot;Cor ad cor loquitur&quot;
                   <span className="block text-base not-italic mt-2 text-muted-foreground/80">
                     Coração fala ao coração
                   </span>
@@ -75,18 +84,22 @@ export default function Sobre() {
                 <Card className="p-8 md:p-10 border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Nossa Missão</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      Nossa Missão
+                    </h2>
                   </div>
                   <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                     <p>
-                      O Apostolado Cardeal Newman é uma iniciativa dedicada a compartilhar
-                      testemunhos e reflexões sobre a conversão ao catolicismo, inspirada
-                      na vida e obra de São João Henrique Newman.
+                      O Apostolado Cardeal Newman é uma iniciativa dedicada a
+                      compartilhar testemunhos e reflexões sobre a conversão ao
+                      catolicismo, inspirada na vida e obra de São João Henrique
+                      Newman.
                     </p>
                     <p>
-                      Nossa missão é oferecer um espaço onde conversos possam compartilhar
-                      suas jornadas de fé, inspirando outros que buscam a verdade e a
-                      plenitude da vida cristã na Igreja Católica.
+                      Nossa missão é oferecer um espaço onde conversos possam
+                      compartilhar suas jornadas de fé, inspirando outros que
+                      buscam a verdade e a plenitude da vida cristã na Igreja
+                      Católica.
                     </p>
                   </div>
                 </Card>
@@ -95,12 +108,15 @@ export default function Sobre() {
                 <Card className="p-8 md:p-10 border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Nossa Visão</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      Nossa Visão
+                    </h2>
                   </div>
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    Acreditamos que cada história de conversão é um testemunho do amor
-                    de Deus e da ação do Espírito Santo. Através destes relatos,
-                    esperamos iluminar o caminho para aqueles que ainda buscam.
+                    Acreditamos que cada história de conversão é um testemunho
+                    do amor de Deus e da ação do Espírito Santo. Através destes
+                    relatos, esperamos iluminar o caminho para aqueles que ainda
+                    buscam.
                   </p>
                 </Card>
 
@@ -108,15 +124,33 @@ export default function Sobre() {
                 <div>
                   <div className="flex items-center gap-3 mb-8">
                     <div className="h-8 w-1 bg-gradient-to-b from-primary to-gold-warm rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Nossos Valores</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      Nossos Valores
+                    </h2>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
                     {[
-                      { icon: Heart, title: 'Fidelidade à doutrina católica', desc: 'Mantemos fidelidade aos ensinamentos da Igreja' },
-                      { icon: Users, title: 'Respeito pelo caminho de cada pessoa', desc: 'Valorizamos a jornada única de cada converso' },
-                      { icon: Target, title: 'Amor à verdade e à beleza', desc: 'Buscamos a verdade em todas as suas formas' },
-                      { icon: CheckCircle, title: 'Caridade fraterna', desc: 'Cultivamos o amor ao próximo em tudo' }
+                      {
+                        icon: Heart,
+                        title: 'Fidelidade à doutrina católica',
+                        desc: 'Mantemos fidelidade aos ensinamentos da Igreja',
+                      },
+                      {
+                        icon: Users,
+                        title: 'Respeito pelo caminho de cada pessoa',
+                        desc: 'Valorizamos a jornada única de cada converso',
+                      },
+                      {
+                        icon: Target,
+                        title: 'Amor à verdade e à beleza',
+                        desc: 'Buscamos a verdade em todas as suas formas',
+                      },
+                      {
+                        icon: CheckCircle,
+                        title: 'Caridade fraterna',
+                        desc: 'Cultivamos o amor ao próximo em tudo',
+                      },
                     ].map((value, index) => (
                       <Card
                         key={index}

@@ -31,9 +31,9 @@ export const booksService = {
         sort: 'order:asc',
         populate: ['cover', 'pdfFile'],
         pagination: {
-          limit: 100
-        }
-      }
+          limit: 100,
+        },
+      },
     });
     return data.data;
   },
@@ -45,11 +45,11 @@ export const booksService = {
     const { data } = await api.get<StrapiResponse<Book>>('/books', {
       params: {
         filters: {
-          category: { $eq: category }
+          category: { $eq: category },
         },
         sort: 'order:asc',
-        populate: ['cover', 'pdfFile']
-      }
+        populate: ['cover', 'pdfFile'],
+      },
     });
     return data.data;
   },
@@ -62,7 +62,7 @@ export const booksService = {
 
     const grouped: Record<string, Book[]> = {};
 
-    books.forEach(book => {
+    books.forEach((book) => {
       if (!grouped[book.category]) {
         grouped[book.category] = [];
       }
@@ -70,7 +70,7 @@ export const booksService = {
     });
 
     return grouped;
-  }
+  },
 };
 
 export default booksService;

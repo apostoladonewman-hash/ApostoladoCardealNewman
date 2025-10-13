@@ -12,7 +12,8 @@ export default function Artigo() {
   const title = article
     ? `${article.title} — Apostolado Cardeal Newman`
     : 'Artigo — Apostolado Cardeal Newman';
-  const description = article?.description ?? 'Artigo do Apostolado Cardeal Newman';
+  const description =
+    article?.description ?? 'Artigo do Apostolado Cardeal Newman';
   const canonical =
     typeof window !== 'undefined' ? window.location.href : undefined;
 
@@ -49,7 +50,10 @@ export default function Artigo() {
     : '';
 
   // Extrair conteúdo dos blocks
-  const content = article.blocks?.find(b => b.__component === 'shared.rich-text')?.body || article.description || '';
+  const content =
+    article.blocks?.find((b) => b.__component === 'shared.rich-text')?.body ||
+    article.description ||
+    '';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -130,7 +134,8 @@ export default function Artigo() {
         {article.fonte_original && (
           <aside className="mt-10 pt-6 border-t border-border/30">
             <p className="text-sm text-muted-foreground">
-              <strong className="text-foreground">Fonte original:</strong> {article.fonte_original}
+              <strong className="text-foreground">Fonte original:</strong>{' '}
+              {article.fonte_original}
             </p>
           </aside>
         )}

@@ -47,7 +47,10 @@ export const useRecentArticles = (limit = 3) => {
 /**
  * Hook para buscar artigos por categoria
  */
-export const useArticlesByCategory = (categorySlug: string, params?: QueryParams) => {
+export const useArticlesByCategory = (
+  categorySlug: string,
+  params?: QueryParams,
+) => {
   return useQuery({
     queryKey: ['articles', 'category', categorySlug, params],
     queryFn: () => articlesService.getByCategory(categorySlug, params),

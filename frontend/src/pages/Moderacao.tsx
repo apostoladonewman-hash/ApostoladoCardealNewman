@@ -4,7 +4,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import testimonialService, { Testimonial } from '@/services/testimonialService';
-import articleSubmissionService, { ArticleSubmission } from '@/services/articleSubmissionService';
+import articleSubmissionService, {
+  ArticleSubmission,
+} from '@/services/articleSubmissionService';
 import {
   FileText,
   User,
@@ -14,25 +16,40 @@ import {
   AlertCircle,
   Loader2,
   MessageSquare,
-  Search
+  Search,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
+
+// Interface para a estrutura esperada do erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function Moderacao() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'testimonials' | 'articles'>('testimonials');
+  const [activeTab, setActiveTab] = useState<'testimonials' | 'articles'>(
+    'testimonials',
+  );
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [articles, setArticles] = useState<ArticleSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState<{ [key: number]: string }>({});
-  const [showRejectForm, setShowRejectForm] = useState<{ [key: number]: boolean }>({});
+  const [rejectReason, setRejectReason] = useState<{ [key: number]: string }>(
+    {},
+  );
+  const [showRejectForm, setShowRejectForm] = useState<{
+    [key: number]: boolean;
+  }>({});
   const [searchTerm, setSearchTerm] = useState('');
 
   // Check if user has permission
-  const hasPermission = user?.userLevel === 'Moderador' || user?.userLevel === 'Administrador';
+  const hasPermission =
+    user?.userLevel === 'Moderador' || user?.userLevel === 'Administrador';
 
   useEffect(() => {
     if (!hasPermission) {
@@ -52,8 +69,13 @@ export default function Moderacao() {
       ]);
       setTestimonials(testimonialsData);
       setArticles(articlesData);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao carregar dados');
+    } catch (err) {
+      let errorMessage = 'Erro ao carregar dados';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setLoading(false);
@@ -65,8 +87,13 @@ export default function Moderacao() {
     try {
       await testimonialService.approveTestimonial(id);
       setTestimonials(testimonials.filter((t) => t.id !== id));
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao aprovar testemunho');
+    } catch (err) {
+      let errorMessage = 'Erro ao aprovar testemunho';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setProcessing(null);
@@ -86,8 +113,13 @@ export default function Moderacao() {
       setTestimonials(testimonials.filter((t) => t.id !== id));
       setRejectReason({ ...rejectReason, [id]: '' });
       setShowRejectForm({ ...showRejectForm, [id]: false });
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao rejeitar testemunho');
+    } catch (err) {
+      let errorMessage = 'Erro ao rejeitar testemunho';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setProcessing(null);
@@ -99,8 +131,13 @@ export default function Moderacao() {
     try {
       await articleSubmissionService.approveArticle(id);
       setArticles(articles.filter((a) => a.id !== id));
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao aprovar artigo');
+    } catch (err) {
+      let errorMessage = 'Erro ao aprovar artigo';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setProcessing(null);
@@ -120,8 +157,13 @@ export default function Moderacao() {
       setArticles(articles.filter((a) => a.id !== id));
       setRejectReason({ ...rejectReason, [id]: '' });
       setShowRejectForm({ ...showRejectForm, [id]: false });
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao rejeitar artigo');
+    } catch (err) {
+      let errorMessage = 'Erro ao rejeitar artigo';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setProcessing(null);
@@ -169,7 +211,9 @@ export default function Moderacao() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-lg text-muted-foreground">Carregando dados de moderação...</p>
+          <p className="text-lg text-muted-foreground">
+            Carregando dados de moderação...
+          </p>
         </div>
       </div>
     );
@@ -270,10 +314,14 @@ export default function Moderacao() {
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhum testemunho pendente'}
+                  {searchTerm
+                    ? 'Nenhum resultado encontrado'
+                    : 'Nenhum testemunho pendente'}
                 </h3>
                 <p className="text-muted-foreground">
-                  {searchTerm ? 'Tente pesquisar com outros termos' : 'Todos os testemunhos foram revisados!'}
+                  {searchTerm
+                    ? 'Tente pesquisar com outros termos'
+                    : 'Todos os testemunhos foram revisados!'}
                 </p>
               </Card>
             ) : (
@@ -288,7 +336,9 @@ export default function Moderacao() {
                             {testimonial.nome_pessoa}
                           </h3>
                           {testimonial.email && (
-                            <p className="text-sm text-muted-foreground">{testimonial.email}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {testimonial.email}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -296,13 +346,17 @@ export default function Moderacao() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-sm">
                         {testimonial.denominacao_anterior && (
                           <div>
-                            <span className="font-semibold">Denominação Anterior:</span>{' '}
+                            <span className="font-semibold">
+                              Denominação Anterior:
+                            </span>{' '}
                             {testimonial.denominacao_anterior}
                           </div>
                         )}
                         {testimonial.data_conversao && (
                           <div>
-                            <span className="font-semibold">Data de Conversão:</span>{' '}
+                            <span className="font-semibold">
+                              Data de Conversão:
+                            </span>{' '}
                             {formatDate(testimonial.data_conversao)}
                           </div>
                         )}
@@ -323,12 +377,16 @@ export default function Moderacao() {
                       {testimonial.biografia && (
                         <div className="mb-4">
                           <h4 className="font-semibold mb-2">Biografia:</h4>
-                          <p className="text-sm text-muted-foreground">{testimonial.biografia}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {testimonial.biografia}
+                          </p>
                         </div>
                       )}
 
                       <div className="mb-4">
-                        <h4 className="font-semibold mb-2">Testemunho Completo:</h4>
+                        <h4 className="font-semibold mb-2">
+                          Testemunho Completo:
+                        </h4>
                         <div className="bg-gray-50 p-4 rounded-lg border border-border max-h-64 overflow-y-auto">
                           <p className="text-sm whitespace-pre-wrap">
                             {testimonial.testemunho_completo}
@@ -338,13 +396,17 @@ export default function Moderacao() {
 
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-4 h-4" />
-                        <span>Submetido em {formatDate(testimonial.data_submissao)}</span>
+                        <span>
+                          Submetido em {formatDate(testimonial.data_submissao)}
+                        </span>
                       </div>
                     </div>
 
                     <div className="lg:w-64 flex flex-col gap-3">
                       <Button
-                        onClick={() => handleApproveTestimonial(testimonial.id!)}
+                        onClick={() =>
+                          handleApproveTestimonial(testimonial.id!)
+                        }
                         disabled={processing === testimonial.id}
                         className="w-full bg-green-600 hover:bg-green-700 text-white"
                       >
@@ -359,7 +421,10 @@ export default function Moderacao() {
                       {!showRejectForm[testimonial.id!] ? (
                         <Button
                           onClick={() =>
-                            setShowRejectForm({ ...showRejectForm, [testimonial.id!]: true })
+                            setShowRejectForm({
+                              ...showRejectForm,
+                              [testimonial.id!]: true,
+                            })
                           }
                           variant="outline"
                           className="w-full border-red-600 text-red-600 hover:bg-red-50"
@@ -375,7 +440,10 @@ export default function Moderacao() {
                           <textarea
                             value={rejectReason[testimonial.id!] || ''}
                             onChange={(e) =>
-                              setRejectReason({ ...rejectReason, [testimonial.id!]: e.target.value })
+                              setRejectReason({
+                                ...rejectReason,
+                                [testimonial.id!]: e.target.value,
+                              })
                             }
                             rows={4}
                             className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500"
@@ -383,7 +451,9 @@ export default function Moderacao() {
                           />
                           <div className="flex gap-2">
                             <Button
-                              onClick={() => handleRejectTestimonial(testimonial.id!)}
+                              onClick={() =>
+                                handleRejectTestimonial(testimonial.id!)
+                              }
                               disabled={processing === testimonial.id}
                               size="sm"
                               className="flex-1 bg-red-600 hover:bg-red-700 text-white"
@@ -397,7 +467,10 @@ export default function Moderacao() {
                             </Button>
                             <Button
                               onClick={() =>
-                                setShowRejectForm({ ...showRejectForm, [testimonial.id!]: false })
+                                setShowRejectForm({
+                                  ...showRejectForm,
+                                  [testimonial.id!]: false,
+                                })
                               }
                               size="sm"
                               variant="outline"
@@ -425,10 +498,14 @@ export default function Moderacao() {
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhum artigo pendente'}
+                  {searchTerm
+                    ? 'Nenhum resultado encontrado'
+                    : 'Nenhum artigo pendente'}
                 </h3>
                 <p className="text-muted-foreground">
-                  {searchTerm ? 'Tente pesquisar com outros termos' : 'Todos os artigos foram revisados!'}
+                  {searchTerm
+                    ? 'Tente pesquisar com outros termos'
+                    : 'Todos os artigos foram revisados!'}
                 </p>
               </Card>
             ) : (
@@ -443,7 +520,9 @@ export default function Moderacao() {
                             {article.title}
                           </h3>
                           {article.description && (
-                            <p className="text-sm text-muted-foreground">{article.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {article.description}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -451,13 +530,17 @@ export default function Moderacao() {
                       <div className="mb-4">
                         <h4 className="font-semibold mb-2">Conteúdo:</h4>
                         <div className="bg-gray-50 p-4 rounded-lg border border-border max-h-96 overflow-y-auto">
-                          <p className="text-sm whitespace-pre-wrap">{article.content}</p>
+                          <p className="text-sm whitespace-pre-wrap">
+                            {article.content}
+                          </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-4 h-4" />
-                        <span>Submetido em {formatDate(article.data_submissao)}</span>
+                        <span>
+                          Submetido em {formatDate(article.data_submissao)}
+                        </span>
                       </div>
                     </div>
 
@@ -478,7 +561,10 @@ export default function Moderacao() {
                       {!showRejectForm[article.id!] ? (
                         <Button
                           onClick={() =>
-                            setShowRejectForm({ ...showRejectForm, [article.id!]: true })
+                            setShowRejectForm({
+                              ...showRejectForm,
+                              [article.id!]: true,
+                            })
                           }
                           variant="outline"
                           className="w-full border-red-600 text-red-600 hover:bg-red-50"
@@ -494,7 +580,10 @@ export default function Moderacao() {
                           <textarea
                             value={rejectReason[article.id!] || ''}
                             onChange={(e) =>
-                              setRejectReason({ ...rejectReason, [article.id!]: e.target.value })
+                              setRejectReason({
+                                ...rejectReason,
+                                [article.id!]: e.target.value,
+                              })
                             }
                             rows={4}
                             className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500"
@@ -516,7 +605,10 @@ export default function Moderacao() {
                             </Button>
                             <Button
                               onClick={() =>
-                                setShowRejectForm({ ...showRejectForm, [article.id!]: false })
+                                setShowRejectForm({
+                                  ...showRejectForm,
+                                  [article.id!]: false,
+                                })
                               }
                               size="sm"
                               variant="outline"

@@ -70,17 +70,66 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
 
                 {/* Rotas Protegidas - Usuários Autenticados */}
-                <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-                <Route path="/meu-testemunho" element={<ProtectedRoute><MeuTestemunho /></ProtectedRoute>} />
-                <Route path="/submeter-artigo" element={<ProtectedRoute><SubmeterArtigo /></ProtectedRoute>} />
-                <Route path="/meus-artigos" element={<ProtectedRoute><MeusArtigos /></ProtectedRoute>} />
+                <Route
+                  path="/perfil"
+                  element={
+                    <ProtectedRoute>
+                      <Perfil />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/meu-testemunho"
+                  element={
+                    <ProtectedRoute>
+                      <MeuTestemunho />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/submeter-artigo"
+                  element={
+                    <ProtectedRoute>
+                      <SubmeterArtigo />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/meus-artigos"
+                  element={
+                    <ProtectedRoute>
+                      <MeusArtigos />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Rotas Protegidas - Moderadores e Administradores */}
-                <Route path="/moderacao" element={<ProtectedRoute><Moderacao /></ProtectedRoute>} />
+                <Route
+                  path="/moderacao"
+                  element={
+                    <ProtectedRoute>
+                      <Moderacao />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Rotas Protegidas - Apenas Administradores */}
-                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                <Route path="/admin/painel" element={<ProtectedRoute><AdminPainel /></ProtectedRoute>} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/painel"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPainel />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

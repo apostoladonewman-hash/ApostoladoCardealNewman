@@ -17,11 +17,13 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Helper para construir query string do Strapi
-export const buildStrapiQuery = (params?: QueryParams): Record<string, unknown> => {
+export const buildStrapiQuery = (
+  params?: QueryParams,
+): Record<string, unknown> => {
   if (!params) return {};
 
   const query: Record<string, unknown> = {};

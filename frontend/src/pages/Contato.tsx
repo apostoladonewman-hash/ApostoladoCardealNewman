@@ -9,15 +9,17 @@ export default function Contato() {
     nome: '',
     email: '',
     assunto: '',
-    mensagem: ''
+    mensagem: '',
   });
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -39,7 +41,10 @@ export default function Contato() {
     <>
       <Helmet>
         <title>Contato — Apostolado Cardeal Newman</title>
-        <meta name="description" content="Entre em contato com o Apostolado Cardeal Newman. Estamos aqui para ajudá-lo." />
+        <meta
+          name="description"
+          content="Entre em contato com o Apostolado Cardeal Newman. Estamos aqui para ajudá-lo."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/[0.02] to-background">
@@ -51,7 +56,9 @@ export default function Contato() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <MessageCircle className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Fale Conosco</span>
+                <span className="text-sm font-medium text-primary">
+                  Fale Conosco
+                </span>
               </div>
 
               {/* Title */}
@@ -61,7 +68,8 @@ export default function Contato() {
 
               {/* Description */}
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Estamos aqui para responder suas dúvidas, ouvir sugestões e ajudá-lo em sua jornada de fé
+                Estamos aqui para responder suas dúvidas, ouvir sugestões e
+                ajudá-lo em sua jornada de fé
               </p>
             </div>
           </div>
@@ -142,7 +150,10 @@ export default function Contato() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="nome" className="block text-sm font-semibold mb-2 text-foreground">
+                    <label
+                      htmlFor="nome"
+                      className="block text-sm font-semibold mb-2 text-foreground"
+                    >
                       Nome completo *
                     </label>
                     <input
@@ -158,7 +169,10 @@ export default function Contato() {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-semibold mb-2 text-foreground">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold mb-2 text-foreground"
+                    >
                       E-mail *
                     </label>
                     <input
@@ -175,7 +189,10 @@ export default function Contato() {
                 </div>
 
                 <div>
-                  <label htmlFor="assunto" className="block text-sm font-semibold mb-2 text-foreground">
+                  <label
+                    htmlFor="assunto"
+                    className="block text-sm font-semibold mb-2 text-foreground"
+                  >
                     Assunto *
                   </label>
                   <input
@@ -191,7 +208,10 @@ export default function Contato() {
                 </div>
 
                 <div>
-                  <label htmlFor="mensagem" className="block text-sm font-semibold mb-2 text-foreground">
+                  <label
+                    htmlFor="mensagem"
+                    className="block text-sm font-semibold mb-2 text-foreground"
+                  >
                     Mensagem *
                   </label>
                   <textarea

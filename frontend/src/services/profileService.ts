@@ -2,12 +2,21 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api';
 
+// Interface para a foto de perfil, evitando 'any'
+export interface ProfilePicture {
+  id: number;
+  name: string;
+  alternativeText?: string;
+  url: string;
+  // Adicione outros campos se o Strapi retornar mais dados
+}
+
 export interface UserProfile {
   id: number;
   username: string;
   email: string;
   nome_completo: string;
-  foto_perfil?: any;
+  foto_perfil?: ProfilePicture | null; // Tipo corrigido
   biografia?: string;
   denominacao_anterior?: string;
   profissao?: string;
@@ -35,9 +44,12 @@ class ProfileService {
   }
 
   async getMyProfile(): Promise<UserProfile> {
-    const response = await axios.get(`${API_URL}/users/me?populate[0]=foto_perfil`, {
-      headers: this.getAuthHeader(),
-    });
+    const response = await axios.get(
+      `${API_URL}/users/me?populate[0]=foto_perfil`,
+      {
+        headers: this.getAuthHeader(),
+      },
+    );
     return response.data;
   }
 
@@ -45,15 +57,11 @@ class ProfileService {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
 
-    const response = await axios.put(
-      `${API_URL}/users/${userId}`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.put(`${API_URL}/users/${userId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   }
 

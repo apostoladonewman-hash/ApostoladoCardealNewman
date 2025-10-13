@@ -1,3 +1,6 @@
+/* global strapi */
+'use strict';
+
 module.exports = (plugin) => {
   /**
    * Validação de senha forte
@@ -6,35 +9,36 @@ module.exports = (plugin) => {
     if (!password || password.length < 8) {
       return {
         valid: false,
-        message: 'A senha deve ter no mínimo 8 caracteres'
+        message: 'A senha deve ter no mínimo 8 caracteres',
       };
     }
 
     if (!/[A-Z]/.test(password)) {
       return {
         valid: false,
-        message: 'A senha deve conter pelo menos uma letra maiúscula'
+        message: 'A senha deve conter pelo menos uma letra maiúscula',
       };
     }
 
     if (!/[a-z]/.test(password)) {
       return {
         valid: false,
-        message: 'A senha deve conter pelo menos uma letra minúscula'
+        message: 'A senha deve conter pelo menos uma letra minúscula',
       };
     }
 
     if (!/[0-9]/.test(password)) {
       return {
         valid: false,
-        message: 'A senha deve conter pelo menos um número'
+        message: 'A senha deve conter pelo menos um número',
       };
     }
 
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
       return {
         valid: false,
-        message: 'A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)'
+        message:
+          'A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)',
       };
     }
 
@@ -64,24 +68,33 @@ module.exports = (plugin) => {
       if (nomeCompleto) {
         try {
           // Buscar autor com o mesmo nome
-          const authors = await strapi.entityService.findMany('api::author.author', {
-            filters: {
-              nome_pessoa: {
-                $eqi: nomeCompleto.trim()
-              }
+          const authors = await strapi.entityService.findMany(
+            'api::author.author',
+            {
+              filters: {
+                nome_pessoa: {
+                  $eqi: nomeCompleto.trim(),
+                },
+              },
+              limit: 1,
             },
-            limit: 1
-          });
+          );
 
           if (authors && authors.length > 0) {
             // Associar o usuário ao autor encontrado
-            await strapi.entityService.update('plugin::users-permissions.user', user.id, {
-              data: {
-                autor_vinculado: authors[0].id
-              }
-            });
+            await strapi.entityService.update(
+              'plugin::users-permissions.user',
+              user.id,
+              {
+                data: {
+                  autor_vinculado: authors[0].id,
+                },
+              },
+            );
 
-            strapi.log.info(`Usuário ${user.id} associado automaticamente ao autor ${authors[0].id}`);
+            strapi.log.info(
+              `Usuário ${user.id} associado automaticamente ao autor ${authors[0].id}`,
+            );
           }
         } catch (error) {
           strapi.log.error('Erro ao associar usuário ao autor:', error);
@@ -104,8 +117,8 @@ module.exports = (plugin) => {
         'plugin::users-permissions.user',
         userId,
         {
-          populate: ['role', 'autor_vinculado', 'foto_perfil']
-        }
+          populate: ['role', 'autor_vinculado', 'foto_perfil'],
+        },
       );
 
       ctx.response.body.user = {
@@ -118,7 +131,7 @@ module.exports = (plugin) => {
         ex_protestante: userWithDetails.ex_protestante,
         pode_contribuir: userWithDetails.pode_contribuir,
         autor_vinculado: userWithDetails.autor_vinculado,
-        role: userWithDetails.role
+        role: userWithDetails.role,
       };
     }
   };

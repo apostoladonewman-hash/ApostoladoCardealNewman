@@ -1,3 +1,5 @@
+'use strict';
+
 const config = {
   locales: [
     // 'ar',
@@ -33,7 +35,8 @@ const bootstrap = (app) => {
   console.log(app);
 };
 
-export default {
+// Corrigido de 'export default' para 'module.exports'
+module.exports = {
   config,
   bootstrap,
 };

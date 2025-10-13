@@ -11,6 +11,15 @@ export interface RegisterData {
   password: string;
 }
 
+// Interface para a foto de perfil, evitando 'any'
+export interface ProfilePicture {
+  id: number;
+  name: string;
+  alternativeText?: string;
+  url: string;
+  // Adicione outros campos se o Strapi retornar mais dados
+}
+
 export interface User {
   id: number;
   username: string;
@@ -21,7 +30,7 @@ export interface User {
   updatedAt: string;
   userLevel?: 'Usuário' | 'Moderador' | 'Administrador';
   nome_completo?: string;
-  foto_perfil?: any;
+  foto_perfil?: ProfilePicture | null; // Tipo corrigido
   role?: {
     id: number;
     name: string;
@@ -52,7 +61,7 @@ export const authService = {
       // Retornar resposta com dados completos
       return {
         jwt: data.jwt,
-        user: fullUser
+        user: fullUser,
       };
     }
 
@@ -63,7 +72,10 @@ export const authService = {
    * Registro de novo usuário
    */
   async register(userData: RegisterData): Promise<AuthResponse> {
-    const { data } = await api.post<AuthResponse>('/auth/local/register', userData);
+    const { data } = await api.post<AuthResponse>(
+      '/auth/local/register',
+      userData,
+    );
 
     // Salvar token e dados do usuário no localStorage
     if (data.jwt) {
@@ -130,9 +142,11 @@ export const authService = {
 
     // Verificar se o role type é 'authenticated' (admin padrão do Strapi)
     // ou se o nome do role contém 'admin'
-    return user.role.type === 'admin' ||
-           user.role.name.toLowerCase().includes('admin') ||
-           user.role.type === 'authenticated'; // Temporário: ajustar conforme configuração
+    return (
+      user.role.type === 'admin' ||
+      user.role.name.toLowerCase().includes('admin') ||
+      user.role.type === 'authenticated'
+    ); // Temporário: ajustar conforme configuração
   },
 
   /**
@@ -148,7 +162,7 @@ export const authService = {
   getUser(): User | null {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
-    
+
     try {
       return JSON.parse(userStr);
     } catch {
@@ -165,11 +179,15 @@ export const authService = {
       throw new Error('No token found');
     }
 
-    const { data: updatedUser } = await api.put<User>(`/users/${userId}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const { data: updatedUser } = await api.put<User>(
+      `/users/${userId}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     // Atualizar localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));

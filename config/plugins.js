@@ -12,7 +12,10 @@ module.exports = ({ env }) => ({
       },
       settings: {
         defaultFrom: env('SMTP_DEFAULT_FROM', 'apostoladonewman@gmail.com'),
-        defaultReplyTo: env('SMTP_DEFAULT_REPLY_TO', 'apostoladonewman@gmail.com'),
+        defaultReplyTo: env(
+          'SMTP_DEFAULT_REPLY_TO',
+          'apostoladonewman@gmail.com',
+        ),
       },
     },
   },

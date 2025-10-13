@@ -42,8 +42,8 @@ export const globalService = {
   async get(): Promise<GlobalSettings> {
     const { data } = await api.get<GlobalResponse>('/global', {
       params: {
-        populate: 'favicon'
-      }
+        populate: 'favicon',
+      },
     });
 
     return {
@@ -55,7 +55,7 @@ export const globalService = {
       whatsappUrl: data.data.whatsappUrl,
       youtubeUrl: data.data.youtubeUrl,
       instagramUrl: data.data.instagramUrl,
-      favicon: data.data.favicon
+      favicon: data.data.favicon,
     };
   },
 };

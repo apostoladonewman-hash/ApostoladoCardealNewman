@@ -49,8 +49,8 @@ docker-compose*.yml
 
 # Database backups
 backups/
-*.sql
-*.dump
+backups/*.sql
+backups/*.dump
 
 # Temporary files
 tmp/

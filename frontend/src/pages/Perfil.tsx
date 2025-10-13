@@ -4,7 +4,23 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, FileText, FolderOpen, Shield, Settings, Camera } from 'lucide-react';
+import {
+  BookOpen,
+  FileText,
+  FolderOpen,
+  Shield,
+  Settings,
+  Camera,
+} from 'lucide-react';
+import { AxiosError } from 'axios';
+import profileService from '@/services/profileService';
+
+// Interface para a estrutura esperada do erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function Perfil() {
   const navigate = useNavigate();
@@ -37,16 +53,22 @@ export default function Perfil() {
     setSuccess('');
 
     try {
-      const profileService = await import('@/services/profileService');
-      await profileService.default.uploadProfilePhoto(file);
+      await profileService.uploadProfilePhoto(file);
       setSuccess('Foto atualizada com sucesso!');
 
-      // Recarregar dados do usuário
+      // Recarregar dados do usuário para refletir a nova foto
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao fazer upload da foto');
+    } catch (err) {
+      let errorMessage = 'Erro ao fazer upload da foto';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setUploadingPhoto(false);
@@ -54,50 +76,23 @@ export default function Perfil() {
   };
 
   const getAvatarUrl = () => {
-    console.log('🔍 DEBUG foto_perfil:', user?.foto_perfil);
-
-    if (!user?.foto_perfil) return null;
-
-    // Caso 1: Array de arquivos (Strapi retorna array)
-    if (Array.isArray(user.foto_perfil) && user.foto_perfil.length > 0) {
-      const firstFile = user.foto_perfil[0];
-      if (firstFile.url) {
-        return `http://localhost:1337${firstFile.url}`;
-      }
+    if (user?.foto_perfil?.url) {
+      const mediaUrl =
+        import.meta.env.VITE_MEDIA_URL || 'http://localhost:1337';
+      return `${mediaUrl}${user.foto_perfil.url}`;
     }
-
-    // Caso 2: Objeto único com data.url (formato Strapi v4+)
-    if (user.foto_perfil.data) {
-      if (Array.isArray(user.foto_perfil.data) && user.foto_perfil.data.length > 0) {
-        return `http://localhost:1337${user.foto_perfil.data[0].attributes.url}`;
-      }
-      if (user.foto_perfil.data.attributes?.url) {
-        return `http://localhost:1337${user.foto_perfil.data.attributes.url}`;
-      }
-    }
-
-    // Caso 3: Objeto com url direto
-    if (typeof user.foto_perfil === 'object' && user.foto_perfil.url) {
-      return `http://localhost:1337${user.foto_perfil.url}`;
-    }
-
-    // Caso 4: String (URL direta)
-    if (typeof user.foto_perfil === 'string') {
-      return `http://localhost:1337${user.foto_perfil}`;
-    }
-
     return null;
   };
 
   const avatarUrl = getAvatarUrl();
-  console.log('📸 Avatar URL final:', avatarUrl);
 
   if (!user) {
     return null;
   }
 
   const userLevel = user.userLevel || 'Usuário';
-  const isModerador = userLevel === 'Moderador' || userLevel === 'Administrador';
+  const isModerador =
+    userLevel === 'Moderador' || userLevel === 'Administrador';
   const isAdmin = userLevel === 'Administrador';
 
   const getBadgeColor = () => {
@@ -126,8 +121,12 @@ export default function Perfil() {
 
           {/* Badge de Nível do Usuário */}
           <div className="flex justify-center mb-4">
-            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold ${getBadgeColor()}`}>
-              {userLevel === 'Administrador' && <Settings className="w-4 h-4" />}
+            <span
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold ${getBadgeColor()}`}
+            >
+              {userLevel === 'Administrador' && (
+                <Settings className="w-4 h-4" />
+              )}
               {userLevel === 'Moderador' && <Shield className="w-4 h-4" />}
               {userLevel}
             </span>
@@ -199,8 +198,18 @@ export default function Perfil() {
 
             <div className="space-y-3 border-t border-border pt-4">
               <div className="flex items-center gap-2 text-sm">
-                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg
+                  className="w-4 h-4 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
                 </svg>
                 <span className="text-muted-foreground">{user.email}</span>
               </div>
@@ -220,7 +229,9 @@ export default function Perfil() {
           {/* Main Content */}
           <Card className="md:col-span-2 p-8">
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-foreground">Informações do Perfil</h3>
+              <h3 className="text-2xl font-bold text-foreground">
+                Informações do Perfil
+              </h3>
             </div>
 
             <div className="space-y-6">
@@ -245,8 +256,16 @@ export default function Perfil() {
                 <div className="flex gap-2">
                   {user.confirmed ? (
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Confirmado
                     </span>
@@ -266,7 +285,9 @@ export default function Perfil() {
 
             {/* Seção de Ações */}
             <div className="mt-8 pt-8 border-t border-border">
-              <h3 className="text-xl font-bold text-foreground mb-4">Minhas Ações</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">
+                Minhas Ações
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Botão: Meu Testemunho */}
@@ -277,8 +298,12 @@ export default function Perfil() {
                 >
                   <BookOpen className="w-5 h-5 text-blue-600" />
                   <div className="text-left">
-                    <div className="font-semibold text-foreground">Meu Testemunho</div>
-                    <div className="text-xs text-muted-foreground">Compartilhe sua história</div>
+                    <div className="font-semibold text-foreground">
+                      Meu Testemunho
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Compartilhe sua história
+                    </div>
                   </div>
                 </Button>
 
@@ -290,8 +315,12 @@ export default function Perfil() {
                 >
                   <FileText className="w-5 h-5 text-green-600" />
                   <div className="text-left">
-                    <div className="font-semibold text-foreground">Submeter Artigo</div>
-                    <div className="text-xs text-muted-foreground">Escreva um artigo</div>
+                    <div className="font-semibold text-foreground">
+                      Submeter Artigo
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Escreva um artigo
+                    </div>
                   </div>
                 </Button>
 
@@ -303,8 +332,12 @@ export default function Perfil() {
                 >
                   <FolderOpen className="w-5 h-5 text-yellow-600" />
                   <div className="text-left">
-                    <div className="font-semibold text-foreground">Meus Artigos</div>
-                    <div className="text-xs text-muted-foreground">Ver artigos submetidos</div>
+                    <div className="font-semibold text-foreground">
+                      Meus Artigos
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Ver artigos submetidos
+                    </div>
                   </div>
                 </Button>
 
@@ -317,8 +350,12 @@ export default function Perfil() {
                   >
                     <Shield className="w-5 h-5 text-blue-700" />
                     <div className="text-left">
-                      <div className="font-semibold text-foreground">Moderação</div>
-                      <div className="text-xs text-muted-foreground">Aprovar/Rejeitar conteúdo</div>
+                      <div className="font-semibold text-foreground">
+                        Moderação
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Aprovar/Rejeitar conteúdo
+                      </div>
                     </div>
                   </Button>
                 )}
@@ -332,8 +369,12 @@ export default function Perfil() {
                   >
                     <Settings className="w-5 h-5 text-purple-700" />
                     <div className="text-left">
-                      <div className="font-semibold text-foreground">Administração</div>
-                      <div className="text-xs text-muted-foreground">Gerenciar usuários</div>
+                      <div className="font-semibold text-foreground">
+                        Administração
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Gerenciar usuários
+                      </div>
                     </div>
                   </Button>
                 )}

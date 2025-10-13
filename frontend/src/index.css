@@ -7,30 +7,30 @@
 @layer base {
   :root {
     /* Fundo em tons de pergaminho/marfim */
-    --background: 39 44% 97%;
-    --foreground: 28 25% 15%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
 
     /* Cards em branco puro com bordas douradas */
     --card: 0 0% 100%;
-    --card-foreground: 28 25% 15%;
+    --card-foreground: 0 0% 3.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 28 25% 15%;
+    --popover-foreground: 0 0% 3.9%;
 
     /* Dourado bizantino/litúrgico */
-    --primary: 43 74% 49%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
 
     /* Tons terrosos/sacros */
-    --secondary: 30 25% 92%;
-    --secondary-foreground: 28 25% 20%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 30 20% 94%;
-    --muted-foreground: 28 15% 45%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
 
     /* Acento em vermelho cardeal mais suave */
-    --accent: 0 58% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
 
     /* Dourado mais quente para gradientes */
     --gold-warm: 38 82% 55%;
@@ -39,50 +39,66 @@
     --bronze: 25 45% 42%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
     /* Bordas em dourado sutil */
-    --border: 43 30% 85%;
-    --input: 43 30% 90%;
-    --ring: 43 74% 49%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
 
-    --radius: 0.375rem;
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
   }
- 
+
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
- 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
- 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
- 
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
     /* Cor Primária para o modo escuro */
-    --primary: 49 65% 51%; /* HSL para #D4B834 */
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
- 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
- 
+    --primary: 0 0% 98%; /* HSL para #D4B834 */
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
 @keyframes watermark-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.08;
     transform: scale(1);
   }
@@ -123,13 +139,20 @@
     animation: watermark-pulse 8s ease-in-out infinite;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Playfair Display', 'EB Garamond', Georgia, serif;
     letter-spacing: -0.02em;
   }
 
   /* Melhor legibilidade para textos pequenos */
-  .text-xs, .text-sm, small {
+  .text-xs,
+  .text-sm,
+  small {
     font-family: 'Crimson Text', Georgia, serif;
     letter-spacing: 0.01em;
     line-height: 1.6;
@@ -141,7 +164,8 @@
     font-weight: 500;
     font-style: italic;
     letter-spacing: 0.05em;
-    background: linear-gradient(135deg,
+    background: linear-gradient(
+      135deg,
       hsl(var(--bronze)) 0%,
       hsl(var(--primary)) 35%,
       hsl(var(--gold-warm)) 65%,
@@ -157,7 +181,8 @@
 
   /* Sutil shimmer para o lema */
   @keyframes motto-shimmer {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {
@@ -186,7 +211,8 @@
   }
 
   .via-gold-warm {
-    --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--gold-warm)), var(--tw-gradient-to);
+    --tw-gradient-stops:
+      var(--tw-gradient-from), hsl(var(--gold-warm)), var(--tw-gradient-to);
   }
 
   .to-bronze {
@@ -200,7 +226,8 @@
   }
 
   /* Estilos para conteúdo de artigos e testemunhos */
-  .article-content, .testimony-content {
+  .article-content,
+  .testimony-content {
     @apply text-foreground leading-relaxed;
     text-align: justify;
     hyphens: auto;
@@ -208,45 +235,58 @@
     -moz-hyphens: auto;
   }
 
-  .article-content p, .testimony-content p {
+  .article-content p,
+  .testimony-content p {
     @apply mb-4;
     text-indent: 2em;
     line-height: 1.8;
   }
 
-  .article-content p:first-of-type, .testimony-content p:first-of-type {
+  .article-content p:first-of-type,
+  .testimony-content p:first-of-type {
     text-indent: 0;
   }
 
-  .article-content h1, .article-content h2, .article-content h3,
-  .testimony-content h1, .testimony-content h2, .testimony-content h3 {
+  .article-content h1,
+  .article-content h2,
+  .article-content h3,
+  .testimony-content h1,
+  .testimony-content h2,
+  .testimony-content h3 {
     @apply font-bold mb-4 mt-8;
     text-align: left;
     text-indent: 0;
   }
 
-  .article-content h1, .testimony-content h1 {
+  .article-content h1,
+  .testimony-content h1 {
     @apply text-3xl;
   }
 
-  .article-content h2, .testimony-content h2 {
+  .article-content h2,
+  .testimony-content h2 {
     @apply text-2xl;
   }
 
-  .article-content h3, .testimony-content h3 {
+  .article-content h3,
+  .testimony-content h3 {
     @apply text-xl;
   }
 
-  .article-content ul, .article-content ol,
-  .testimony-content ul, .testimony-content ol {
+  .article-content ul,
+  .article-content ol,
+  .testimony-content ul,
+  .testimony-content ol {
     @apply mb-4 ml-8;
   }
 
-  .article-content li, .testimony-content li {
+  .article-content li,
+  .testimony-content li {
     @apply mb-2;
   }
 
-  .article-content blockquote, .testimony-content blockquote {
+  .article-content blockquote,
+  .testimony-content blockquote {
     @apply border-l-4 border-primary/30 pl-6 py-3 italic my-6 bg-primary/5 rounded-r;
   }
 

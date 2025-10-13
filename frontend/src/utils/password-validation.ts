@@ -14,12 +14,14 @@ export interface PasswordValidationResult {
   strength?: 'weak' | 'medium' | 'strong';
 }
 
-export const validatePassword = (password: string): PasswordValidationResult => {
+export const validatePassword = (
+  password: string,
+): PasswordValidationResult => {
   if (!password || password.length < 8) {
     return {
       valid: false,
       message: 'A senha deve ter no mínimo 8 caracteres',
-      strength: 'weak'
+      strength: 'weak',
     };
   }
 
@@ -29,7 +31,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     return {
       valid: false,
       message: 'A senha deve conter pelo menos uma letra maiúscula',
-      strength: 'weak'
+      strength: 'weak',
     };
   }
   strength++;
@@ -38,7 +40,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     return {
       valid: false,
       message: 'A senha deve conter pelo menos uma letra minúscula',
-      strength: 'weak'
+      strength: 'weak',
     };
   }
   strength++;
@@ -47,7 +49,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     return {
       valid: false,
       message: 'A senha deve conter pelo menos um número',
-      strength: 'weak'
+      strength: 'weak',
     };
   }
   strength++;
@@ -55,8 +57,9 @@ export const validatePassword = (password: string): PasswordValidationResult => 
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     return {
       valid: false,
-      message: 'A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)',
-      strength: 'medium'
+      message:
+        'A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?":{}|<>)',
+      strength: 'medium',
     };
   }
   strength++;
@@ -69,11 +72,13 @@ export const validatePassword = (password: string): PasswordValidationResult => 
 
   return {
     valid: true,
-    strength: passwordStrength
+    strength: passwordStrength,
   };
 };
 
-export const getPasswordStrengthColor = (strength?: 'weak' | 'medium' | 'strong'): string => {
+export const getPasswordStrengthColor = (
+  strength?: 'weak' | 'medium' | 'strong',
+): string => {
   switch (strength) {
     case 'weak':
       return 'text-red-500';
@@ -86,7 +91,9 @@ export const getPasswordStrengthColor = (strength?: 'weak' | 'medium' | 'strong'
   }
 };
 
-export const getPasswordStrengthText = (strength?: 'weak' | 'medium' | 'strong'): string => {
+export const getPasswordStrengthText = (
+  strength?: 'weak' | 'medium' | 'strong',
+): string => {
   switch (strength) {
     case 'weak':
       return 'Fraca';

@@ -23,7 +23,7 @@ export const aboutService = {
     const { data } = await api.get<AboutResponse>('/about');
     return {
       title: data.data.title,
-      content: data.data.content
+      content: data.data.content,
     };
   },
 };

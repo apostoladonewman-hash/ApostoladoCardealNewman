@@ -7,7 +7,11 @@ export interface Link {
   title: string;
   url: string;
   description: string;
-  category: 'Sites Católicos' | 'Sobre Newman' | 'Formação e Espiritualidade' | 'Outros';
+  category:
+    | 'Sites Católicos'
+    | 'Sobre Newman'
+    | 'Formação e Espiritualidade'
+    | 'Outros';
   order: number;
 }
 
@@ -20,9 +24,9 @@ export const linksService = {
       params: {
         sort: 'order:asc',
         pagination: {
-          limit: 100
-        }
-      }
+          limit: 100,
+        },
+      },
     });
     return data.data;
   },
@@ -34,10 +38,10 @@ export const linksService = {
     const { data } = await api.get<StrapiResponse<Link>>('/links', {
       params: {
         filters: {
-          category: { $eq: category }
+          category: { $eq: category },
         },
-        sort: 'order:asc'
-      }
+        sort: 'order:asc',
+      },
     });
     return data.data;
   },
@@ -50,7 +54,7 @@ export const linksService = {
 
     const grouped: Record<string, Link[]> = {};
 
-    links.forEach(link => {
+    links.forEach((link) => {
       if (!grouped[link.category]) {
         grouped[link.category] = [];
       }
@@ -58,7 +62,7 @@ export const linksService = {
     });
 
     return grouped;
-  }
+  },
 };
 
 export default linksService;

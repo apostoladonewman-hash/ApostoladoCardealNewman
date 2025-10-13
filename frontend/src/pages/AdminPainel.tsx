@@ -1,339 +1,321 @@
-import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '@/services/auth';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import DOMPurify from 'dompurify';
+import { authService } from '@/services/auth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface PendingContent {
   id: number;
-  documentId: string;
-  tipo_conteudo: string;
-  titulo: string;
-  conteudo: string;
-  status_aprovacao: string;
-  data_submissao: string;
-  autor_contribuidor: {
-    nome_completo: string;
-    email: string;
-  };
-  categoria: {
-    name: string;
+  type: 'Artigo' | 'Testemunho';
+  title: string;
+  autor_contribuidor?: { nome_completo: string };
+  categoria?: { name: string };
+  createdAt: string;
+  content: string;
+}
+
+// Definição de tipo correta para a estrutura de erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
   };
 }
 
 export default function AdminPainel() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [pendingContents, setPendingContents] = useState<PendingContent[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [selectedContent, setSelectedContent] = useState<PendingContent | null>(null);
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(5);
   const [total, setTotal] = useState(0);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!authService.isAuthenticated() || !authService.isAdmin()) {
-      navigate('/');
-      return;
-    }
-
-    loadPendingContents();
-  }, [navigate, page]);
-
-  const loadPendingContents = async () => {
+  const loadPendingContents = useCallback(async () => {
+    const token = authService.getToken();
+    if (!token) return;
+    setLoading(true);
     try {
-      const token = authService.getToken();
-      const response = await axios.get(`${API_URL}/api/pending-contents/pending`, {
+      const response = await axios.get(`${API_URL}/pending-contents/pending`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         params: {
           'pagination[page]': page,
           'pagination[pageSize]': pageSize,
-          'pagination[withCount]': true
-        }
+          'pagination[withCount]': true,
+        },
       });
-
       setPendingContents(response.data.data);
-      setTotal(response.data.meta?.pagination?.total || 0);
-    } catch (err: any) {
-      setError('Erro ao carregar conteúdos pendentes');
+      setTotal(response.data.meta.pagination.total);
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message ||
+          'Erro ao carregar conteúdos pendentes.',
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
 
-  const handleApprove = async (id: number) => {
-    setError(null);
-    setSuccess(null);
+  useEffect(() => {
+    loadPendingContents();
+  }, [loadPendingContents]);
 
+  const handleApprove = async (id: number, type: string) => {
+    const token = authService.getToken();
+    if (processingId || !token) return;
+    setProcessingId(id);
     try {
-      const token = authService.getToken();
-      await axios.put(
+      await axios.post(
         `${API_URL}/api/pending-contents/${id}/approve`,
-        {},
+        { type },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      setSuccess('Conteúdo aprovado e publicado com sucesso!');
-      await loadPendingContents();
-      setSelectedContent(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao aprovar conteúdo');
-    }
-  };
-
-  const handleReject = async (id: number) => {
-    if (!rejectionReason.trim()) {
-      setError('Por favor, informe o motivo da rejeição');
-      return;
-    }
-
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const token = authService.getToken();
-      await axios.put(
-        `${API_URL}/api/pending-contents/${id}/reject`,
-        {
-          data: {
-            motivo_rejeicao: rejectionReason
-          }
+            Authorization: `Bearer ${token}`,
+          },
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
       );
-
-      setSuccess('Conteúdo rejeitado com sucesso!');
+      toast.success('Conteúdo aprovado e publicado com sucesso!');
       await loadPendingContents();
-      setSelectedContent(null);
-      setRejectionReason('');
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao rejeitar conteúdo');
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message || 'Erro ao aprovar conteúdo',
+      );
+    } finally {
+      setProcessingId(null);
     }
   };
 
-  if (loading) {
+  const handleReject = async (id: number, type: string) => {
+    const token = authService.getToken();
+    const reason = prompt(
+      'Por favor, insira o motivo da rejeição (será enviado ao autor):',
+    );
+    if (reason) {
+      if (processingId || !token) return;
+      setProcessingId(id);
+      try {
+        await axios.post(
+          `${API_URL}/api/pending-contents/${id}/reject`,
+          {
+            type,
+            reason,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        toast.success('Conteúdo rejeitado com sucesso!');
+        await loadPendingContents();
+      } catch (err) {
+        const axiosError = err as AxiosError<ApiErrorData>;
+        toast.error(
+          axiosError.response?.data?.error?.message ||
+            'Erro ao rejeitar conteúdo',
+        );
+      } finally {
+        setProcessingId(null);
+      }
+    }
+  };
+
+  if (
+    !user ||
+    !user.role ||
+    (user.role.name !== 'Administrator' && user.role.name !== 'Moderator')
+  ) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando painel...</p>
-        </div>
+      <div className="container mx-auto text-center py-20">
+        <h1 className="text-2xl font-bold">Acesso Negado</h1>
+        <p>Você não tem permissão para acessar esta página.</p>
+        <Button onClick={() => navigate('/')} className="mt-4">
+          Voltar para a Home
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-20">
+    <>
       <Helmet>
-        <title>Painel de Administração - Apostolado Cardeal Newman</title>
+        <title>Painel de Moderação</title>
       </Helmet>
-
-      <div className="container max-w-7xl">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Painel de Administração
-            </h1>
-            <div className="h-1 w-20 bg-gradient-to-r from-[hsl(var(--bronze))] via-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] rounded-full mb-4"></div>
-            <p className="text-lg text-muted-foreground">
-              Gerencie conteúdos pendentes de aprovação
-            </p>
-          </div>
-          <Button
-            onClick={() => navigate('/perfil')}
-            variant="outline"
-          >
-            Voltar ao Perfil
+      <div className="container mx-auto py-10">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Painel de Moderação</h1>
+          <Button onClick={() => navigate('/admin')} variant="outline">
+            Gerenciar Usuários
           </Button>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-300 rounded-lg text-green-700">
-            {success}
-          </div>
-        )}
-
-        {pendingContents.length === 0 ? (
-          <Card className="p-12 text-center">
-            <svg className="w-16 h-16 text-muted-foreground mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 className="text-xl font-bold text-foreground mb-2">
-              Nenhum conteúdo pendente
-            </h3>
+        {loading ? (
+          <p>Carregando...</p>
+        ) : pendingContents.length === 0 ? (
+          <Card className="text-center p-8">
+            <div className="w-16 h-16 text-muted-foreground mx-auto mb-4">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold">Tudo em ordem!</h2>
             <p className="text-muted-foreground">
-              Não há conteúdos aguardando aprovação no momento.
+              Não há nenhum conteúdo pendente para moderação no momento.
             </p>
           </Card>
         ) : (
-          <div className="grid gap-6">
+          <div className="space-y-6">
             {pendingContents.map((content) => (
-              <Card key={content.id} className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-2xl font-bold text-foreground">
-                        {content.titulo}
+              <Card key={content.id}>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-start">
+                    <div>
+                      <span
+                        className={`text-sm font-semibold px-2 py-1 rounded-md ${
+                          content.type === 'Artigo'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                        }`}
+                      >
+                        {content.type}
+                      </span>
+                      <h3 className="text-xl font-bold mt-2">
+                        {content.title}
                       </h3>
-                      <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
-                        {content.tipo_conteudo === 'article' ? 'Artigo' : content.tipo_conteudo}
-                      </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>
-                        Por: {content.autor_contribuidor?.nome_completo || 'Desconhecido'}
-                      </span>
+                    <div className="text-right text-sm text-muted-foreground">
+                      <p>
+                        <strong>Autor:</strong>{' '}
+                        {content.autor_contribuidor?.nome_completo ||
+                          'Não informado'}
+                      </p>
                       {content.categoria && (
-                        <span>
-                          Categoria: {content.categoria.name}
-                        </span>
+                        <p>
+                          <strong>Categoria:</strong> {content.categoria.name}
+                        </p>
                       )}
-                      <span>
-                        {new Date(content.data_submissao).toLocaleDateString('pt-BR')}
-                      </span>
+                      <p>
+                        <strong>Enviado em:</strong>{' '}
+                        {new Date(content.createdAt).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                          },
+                        )}
+                      </p>
                     </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none border-t pt-4">
+                    <p className="font-semibold mb-2">Conteúdo:</p>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(content.content, {
+                          ALLOWED_TAGS: [
+                            'p',
+                            'br',
+                            'strong',
+                            'em',
+                            'u',
+                            'h1',
+                            'h2',
+                            'h3',
+                            'h4',
+                            'h5',
+                            'h6',
+                            'ul',
+                            'ol',
+                            'li',
+                            'a',
+                            'blockquote',
+                          ],
+                          ALLOWED_ATTR: ['href', 'target'],
+                        }),
+                      }}
+                    />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex justify-end gap-2 mt-6">
                     <Button
-                      onClick={() => setSelectedContent(content)}
-                      variant="outline"
-                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleReject(content.id, content.type)}
+                      disabled={processingId === content.id}
                     >
-                      Ver Detalhes
+                      Rejeitar
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleApprove(content.id, content.type)}
+                      disabled={processingId === content.id}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Aprovar
                     </Button>
                   </div>
-                </div>
-
-                {selectedContent?.id === content.id && (
-                  <div className="mt-6 pt-6 border-t border-border">
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-foreground mb-3">Conteúdo:</h4>
-                      <div
-                        className="prose prose-sm max-w-none p-4 bg-muted/30 rounded-lg"
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(content.conteudo, {
-                            ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote'],
-                            ALLOWED_ATTR: ['href', 'target', 'rel']
-                          })
-                        }}
-                      />
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Motivo da rejeição (se aplicável):
-                        </label>
-                        <textarea
-                          value={rejectionReason}
-                          onChange={(e) => setRejectionReason(e.target.value)}
-                          rows={3}
-                          className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                          placeholder="Descreva o motivo da rejeição..."
-                        />
-                      </div>
-
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={() => handleApprove(content.id)}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          Aprovar e Publicar
-                        </Button>
-                        <Button
-                          onClick={() => handleReject(content.id)}
-                          variant="outline"
-                          className="border-destructive text-destructive hover:bg-destructive hover:text-white"
-                        >
-                          Rejeitar
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setSelectedContent(null);
-                            setRejectionReason('');
-                          }}
-                          variant="outline"
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </CardContent>
               </Card>
             ))}
-          </div>
-        )}
-
-        {/* Paginação */}
-        {total > pageSize && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            <Button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              variant="outline"
-              size="sm"
-            >
-              Anterior
-            </Button>
-
-            <div className="flex items-center gap-2">
-              {Array.from({ length: Math.ceil(total / pageSize) }, (_, i) => i + 1)
-                .filter(p => p === 1 || p === Math.ceil(total / pageSize) || Math.abs(p - page) <= 1)
-                .map((p, idx, arr) => (
-                  <div key={p} className="flex items-center gap-2">
-                    {idx > 0 && arr[idx - 1] !== p - 1 && <span className="text-muted-foreground">...</span>}
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <Button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Anterior
+              </Button>
+              {Array.from(
+                { length: Math.ceil(total / pageSize) },
+                (_, i) => i + 1,
+              )
+                .filter(
+                  (p) =>
+                    p === 1 ||
+                    p === Math.ceil(total / pageSize) ||
+                    Math.abs(p - page) <= 1,
+                )
+                .map((p, index, arr) => (
+                  <div key={p} className="flex items-center">
+                    {index > 0 && p - arr[index - 1] > 1 && (
+                      <span className="text-muted-foreground mx-2">...</span>
+                    )}
                     <Button
+                      variant={p === page ? 'default' : 'outline'}
                       onClick={() => setPage(p)}
-                      variant={page === p ? 'default' : 'outline'}
-                      size="sm"
-                      className="min-w-[40px]"
                     >
                       {p}
                     </Button>
                   </div>
-                ))
-              }
+                ))}
+
+              <Button
+                onClick={() =>
+                  setPage((p) => Math.min(Math.ceil(total / pageSize), p + 1))
+                }
+                disabled={page === Math.ceil(total / pageSize)}
+              >
+                Próximo
+              </Button>
             </div>
-
-            <Button
-              onClick={() => setPage(p => Math.min(Math.ceil(total / pageSize), p + 1))}
-              disabled={page === Math.ceil(total / pageSize)}
-              variant="outline"
-              size="sm"
-            >
-              Próxima
-            </Button>
-
-            <span className="text-sm text-muted-foreground ml-4">
-              Página {page} de {Math.ceil(total / pageSize)} ({total} itens)
-            </span>
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

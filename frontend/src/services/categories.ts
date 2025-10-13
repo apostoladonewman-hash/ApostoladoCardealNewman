@@ -1,5 +1,10 @@
 import { api, buildStrapiQuery } from './api';
-import type { StrapiResponse, StrapiSingleResponse, Category, QueryParams } from '@/types/strapi';
+import type {
+  StrapiResponse,
+  StrapiSingleResponse,
+  Category,
+  QueryParams,
+} from '@/types/strapi';
 
 export const categoriesService = {
   /**
@@ -7,7 +12,9 @@ export const categoriesService = {
    */
   async getAll(params?: QueryParams): Promise<StrapiResponse<Category>> {
     const query = buildStrapiQuery(params);
-    const { data } = await api.get<StrapiResponse<Category>>('/categories', { params: query });
+    const { data } = await api.get<StrapiResponse<Category>>('/categories', {
+      params: query,
+    });
     return data;
   },
 
@@ -19,7 +26,9 @@ export const categoriesService = {
       filters: { slug: { $eq: slug } },
     });
 
-    const { data } = await api.get<StrapiResponse<Category>>('/categories', { params: query });
+    const { data } = await api.get<StrapiResponse<Category>>('/categories', {
+      params: query,
+    });
     return data.data[0] || null;
   },
 
@@ -27,7 +36,9 @@ export const categoriesService = {
    * Buscar categoria por ID
    */
   async getById(id: number): Promise<Category> {
-    const { data } = await api.get<StrapiSingleResponse<Category>>(`/categories/${id}`);
+    const { data } = await api.get<StrapiSingleResponse<Category>>(
+      `/categories/${id}`,
+    );
     return data.data;
   },
 };

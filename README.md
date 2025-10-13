@@ -11,6 +11,7 @@
 ## 🎯 Sobre o Projeto
 
 O **apostoladonewman.com.br** é um website que fornece uma plataforma completa para:
+
 - 📝 Gerenciamento de artigos, testemunhos e biblioteca
 - 👥 Sistema de autenticação e perfis de usuário
 - 📚 Catálogo de livros e recursos
@@ -28,6 +29,7 @@ O **apostoladonewman.com.br** é um website que fornece uma plataforma completa 
 ## ✨ Features
 
 ### 🔒 Segurança
+
 - ✅ XSS Protection (DOMPurify)
 - ✅ Rate Limiting (5 req/15min)
 - ✅ Strong Password Policy (8+ chars, complexity)
@@ -37,6 +39,7 @@ O **apostoladonewman.com.br** é um website que fornece uma plataforma completa 
 - ✅ HTTPS/SSL Support
 
 ### ⚡ Performance
+
 - ✅ Lazy Loading & Code Splitting
 - ✅ Database Indexes
 - ✅ API Response Caching
@@ -44,6 +47,7 @@ O **apostoladonewman.com.br** é um website que fornece uma plataforma completa 
 - ✅ Gzip Compression
 
 ### 🏗️ DevOps
+
 - ✅ Docker & Docker Compose
 - ✅ CI/CD with GitHub Actions
 - ✅ Automated Backups
@@ -63,22 +67,26 @@ O **apostoladonewman.com.br** é um website que fornece uma plataforma completa 
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/seu-usuario/ApostoladoCardealNewman.git
 cd ApostoladoCardealNewman
 ```
 
 2. **Configure environment variables**
+
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env` with your configuration:
+
 - Database credentials
 - JWT secrets
 - CORS origins
 
 3. **Install dependencies**
+
 ```bash
 # Backend
 npm install
@@ -88,11 +96,13 @@ cd frontend && npm install
 ```
 
 4. **Run database migrations**
+
 ```bash
 npm run db:migrate
 ```
 
 5. **Start development servers**
+
 ```bash
 # Backend (Terminal 1)
 npm run develop
@@ -102,6 +112,7 @@ cd frontend && npm run dev
 ```
 
 Access:
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:1337
 - Admin Panel: http://localhost:1337/admin
@@ -261,6 +272,7 @@ For detailed security documentation, see [`docs/security/SECURITY_IMPROVEMENTS.m
 ### Logs
 
 Logs are stored in the `logs/` directory:
+
 - `combined-*.log` - All logs
 - `error-*.log` - Error logs only
 - `exceptions.log` - Uncaught exceptions
@@ -275,6 +287,7 @@ tail -f logs/error-$(date +%Y-%m-%d).log
 ### Health Monitoring
 
 Configure monitoring tools to check:
+
 - `/api/health` - Overall application health
 - `/api/health/ready` - Application readiness
 - `/api/health/live` - Application liveness
@@ -311,13 +324,16 @@ npm run backup:all
 Complete documentation is available in the [`docs/`](docs/) directory:
 
 ### Guides
+
 - [Complete Implementation Guide](docs/guides/IMPLEMENTATION_GUIDE_COMPLETE.md)
 - [All Implementations](docs/guides/IMPLEMENTACOES_COMPLETAS_FINAL.md)
 
 ### Security
+
 - [Security Improvements](docs/security/SECURITY_IMPROVEMENTS.md)
 
 ### Infrastructure
+
 - [Nginx + SSL Setup](docs/infrastructure/nginx-ssl-guide.md)
 - [Database Migrations](docs/infrastructure/database-migrations.md)
 
@@ -366,6 +382,7 @@ We welcome contributions! Please follow these steps:
 ### Commit Convention
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
 - `feat:` New feature
 - `fix:` Bug fix
 - `docs:` Documentation changes
@@ -392,6 +409,7 @@ This project is private and proprietary.
 ## 📞 Support
 
 For technical issues or questions:
+
 - Review the [documentation](docs/)
 - Check [troubleshooting guide](docs/guides/IMPLEMENTACOES_COMPLETAS_FINAL.md#-troubleshooting)
 - Contact the development team

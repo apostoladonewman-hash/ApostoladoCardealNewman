@@ -3,11 +3,11 @@
  * Creates automated backups of PostgreSQL database
  *
  * Usage:
- *   node scripts/backup-database.js
+ * node scripts/backup-database.js
  *
  * Environment variables required:
- *   DATABASE_HOST, DATABASE_PORT, DATABASE_NAME,
- *   DATABASE_USERNAME, DATABASE_PASSWORD
+ * DATABASE_HOST, DATABASE_PORT, DATABASE_NAME,
+ * DATABASE_USERNAME, DATABASE_PASSWORD
  */
 
 const { execSync } = require('child_process');
@@ -80,7 +80,7 @@ function createBackup() {
     console.log(`Size: ${sizeInMB} MB`);
     console.log(`Path: ${filepath}`);
 
-    return filepath;
+    // No need to return the path if it's not used
   } catch (error) {
     console.error('❌ Backup failed:', error.message);
     throw error;
@@ -93,9 +93,10 @@ function createBackup() {
 function cleanOldBackups() {
   console.log('\n🧹 Cleaning old backups...');
 
-  const files = fs.readdirSync(BACKUP_DIR)
-    .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
-    .map(file => ({
+  const files = fs
+    .readdirSync(BACKUP_DIR)
+    .filter((file) => file.startsWith('backup-') && file.endsWith('.sql'))
+    .map((file) => ({
       name: file,
       path: path.join(BACKUP_DIR, file),
       time: fs.statSync(path.join(BACKUP_DIR, file)).mtime.getTime(),
@@ -104,7 +105,7 @@ function cleanOldBackups() {
 
   if (files.length > MAX_BACKUPS) {
     const toDelete = files.slice(MAX_BACKUPS);
-    toDelete.forEach(file => {
+    toDelete.forEach((file) => {
       fs.unlinkSync(file.path);
       console.log(`  Deleted: ${file.name}`);
     });
@@ -123,7 +124,7 @@ async function main() {
     console.log('========================\n');
 
     ensureBackupDir();
-    const backupPath = createBackup();
+    createBackup(); // A variável 'backupPath' foi removida
     cleanOldBackups();
 
     console.log('\n✨ Backup process completed successfully!');

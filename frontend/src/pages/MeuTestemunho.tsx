@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import testimonialService, { Testimonial } from '../services/testimonialService';
+import testimonialService, {
+  Testimonial,
+} from '../services/testimonialService';
 import { Helmet } from 'react-helmet-async';
 import { Save, AlertCircle, CheckCircle, XCircle, Camera } from 'lucide-react';
+import { AxiosError } from 'axios';
+
+// Interface para a estrutura esperada do erro da API
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function MeuTestemunho() {
   const navigate = useNavigate();
@@ -38,7 +48,7 @@ export default function MeuTestemunho() {
           nome_pessoa: data.nome_pessoa || '',
           email: data.email || '',
           denominacao_anterior: data.denominacao_anterior || '',
-          data_conversao: data.data_conversao || '',
+          data_conversao: data.data_conversao?.split('T')[0] || '', // Formatar data
           ano_nascimento: data.ano_nascimento?.toString() || '',
           cidade_natural: data.cidade_natural || '',
           cidade_atual: data.cidade_atual || '',
@@ -63,7 +73,9 @@ export default function MeuTestemunho() {
     try {
       const dataToSend = {
         ...formData,
-        ano_nascimento: formData.ano_nascimento ? parseInt(formData.ano_nascimento) : undefined,
+        ano_nascimento: formData.ano_nascimento
+          ? parseInt(formData.ano_nascimento)
+          : undefined,
       };
 
       if (testimonial) {
@@ -77,8 +89,15 @@ export default function MeuTestemunho() {
       setTimeout(() => {
         loadTestimonial();
       }, 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Erro ao salvar testemunho');
+    } catch (err) {
+      let errorMessage = 'Erro ao salvar testemunho';
+      if (err instanceof AxiosError && err.response?.data) {
+        const apiError = err.response.data as ApiErrorData;
+        errorMessage = apiError.error?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
       console.error(err);
     } finally {
       setSaving(false);
@@ -136,7 +155,10 @@ export default function MeuTestemunho() {
     return badges[testimonial.status];
   };
 
-  const canEdit = !testimonial || testimonial.status === 'pending' || testimonial.status === 'rejected';
+  const canEdit =
+    !testimonial ||
+    testimonial.status === 'pending' ||
+    testimonial.status === 'rejected';
 
   if (loading) {
     return (
@@ -157,7 +179,9 @@ export default function MeuTestemunho() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-bold text-gray-900">Meu Testemunho</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Meu Testemunho
+              </h1>
               {getStatusBadge()}
             </div>
 
@@ -167,20 +191,23 @@ export default function MeuTestemunho() {
               </div>
             )}
 
-            {testimonial?.status === 'rejected' && testimonial.motivo_rejeicao && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="font-semibold text-red-900 mb-2">Motivo da Rejeição:</p>
-                <p className="text-red-800">{testimonial.motivo_rejeicao}</p>
-                <p className="text-sm text-red-700 mt-2">
-                  Você pode editar e reenviar seu testemunho.
-                </p>
-              </div>
-            )}
+            {testimonial?.status === 'rejected' &&
+              testimonial.motivo_rejeicao && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="font-semibold text-red-900 mb-2">
+                    Motivo da Rejeição:
+                  </p>
+                  <p className="text-red-800">{testimonial.motivo_rejeicao}</p>
+                  <p className="text-sm text-red-700 mt-2">
+                    Você pode editar e reenviar seu testemunho.
+                  </p>
+                </div>
+              )}
 
             {!testimonial && (
               <p className="text-gray-600">
-                Compartilhe sua história de conversão para inspirar outros. Após a submissão,
-                um moderador irá revisar seu testemunho.
+                Compartilhe sua história de conversão para inspirar outros. Após
+                a submissão, um moderador irá revisar seu testemunho.
               </p>
             )}
           </div>
@@ -243,7 +270,9 @@ export default function MeuTestemunho() {
                 <input
                   type="text"
                   value={formData.nome_pessoa}
-                  onChange={(e) => setFormData({ ...formData, nome_pessoa: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nome_pessoa: e.target.value })
+                  }
                   disabled={!canEdit}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
@@ -257,7 +286,9 @@ export default function MeuTestemunho() {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -270,7 +301,12 @@ export default function MeuTestemunho() {
                 <input
                   type="text"
                   value={formData.denominacao_anterior}
-                  onChange={(e) => setFormData({ ...formData, denominacao_anterior: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      denominacao_anterior: e.target.value,
+                    })
+                  }
                   disabled={!canEdit}
                   placeholder="Ex: Batista, Presbiteriana..."
                   required
@@ -285,7 +321,9 @@ export default function MeuTestemunho() {
                 <input
                   type="date"
                   value={formData.data_conversao}
-                  onChange={(e) => setFormData({ ...formData, data_conversao: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, data_conversao: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -298,9 +336,11 @@ export default function MeuTestemunho() {
                 <input
                   type="number"
                   min="1900"
-                  max="2100"
+                  max={new Date().getFullYear()}
                   value={formData.ano_nascimento}
-                  onChange={(e) => setFormData({ ...formData, ano_nascimento: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ano_nascimento: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -313,7 +353,9 @@ export default function MeuTestemunho() {
                 <input
                   type="text"
                   value={formData.profissao}
-                  onChange={(e) => setFormData({ ...formData, profissao: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, profissao: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -326,7 +368,9 @@ export default function MeuTestemunho() {
                 <input
                   type="text"
                   value={formData.cidade_natural}
-                  onChange={(e) => setFormData({ ...formData, cidade_natural: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cidade_natural: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -339,7 +383,9 @@ export default function MeuTestemunho() {
                 <input
                   type="text"
                   value={formData.cidade_atual}
-                  onChange={(e) => setFormData({ ...formData, cidade_atual: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, cidade_atual: e.target.value })
+                  }
                   disabled={!canEdit}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
@@ -352,7 +398,9 @@ export default function MeuTestemunho() {
               </label>
               <textarea
                 value={formData.biografia}
-                onChange={(e) => setFormData({ ...formData, biografia: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, biografia: e.target.value })
+                }
                 disabled={!canEdit}
                 rows={3}
                 placeholder="Conte um pouco sobre você..."
@@ -364,12 +412,18 @@ export default function MeuTestemunho() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Testemunho Completo *
                 <span className="text-sm text-gray-500 ml-2">
-                  (Conte sua história de conversão do protestantismo ao catolicismo)
+                  (Conte sua história de conversão do protestantismo ao
+                  catolicismo)
                 </span>
               </label>
               <textarea
                 value={formData.testemunho_completo}
-                onChange={(e) => setFormData({ ...formData, testemunho_completo: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    testemunho_completo: e.target.value,
+                  })
+                }
                 disabled={!canEdit}
                 rows={12}
                 required
@@ -393,7 +447,11 @@ export default function MeuTestemunho() {
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Save className="w-5 h-5" />
-                  {saving ? 'Salvando...' : testimonial ? 'Atualizar Testemunho' : 'Enviar para Moderação'}
+                  {saving
+                    ? 'Salvando...'
+                    : testimonial
+                      ? 'Atualizar Testemunho'
+                      : 'Enviar para Moderação'}
                 </button>
               </div>
             )}

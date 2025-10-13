@@ -1,36 +1,44 @@
 import { useState } from 'react';
+import { useAuth, LoginCredentials } from '@/contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
+import { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+
+interface ApiErrorData {
+  error: {
+    message: string;
+  };
+}
 
 export default function Login() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
+  const [credentials, setCredentials] = useState<LoginCredentials>({
     identifier: '',
-    password: ''
+    password: '',
   });
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-
     try {
-      await login(formData);
+      await login(credentials);
+      toast.success('Login realizado com sucesso!');
       navigate('/perfil');
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorData>;
+      toast.error(
+        axiosError.response?.data?.error?.message ||
+          'Identificador ou senha inválidos.',
+      );
     } finally {
       setLoading(false);
     }
@@ -42,33 +50,29 @@ export default function Login() {
         <title>Login - Apostolado Cardeal Newman</title>
       </Helmet>
 
-      <div className="container max-w-md">
+      <div className="container max-w-2xl">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Entrar
+            Acessar Conta
           </h1>
           <div className="h-1 w-20 bg-gradient-to-r from-[hsl(var(--bronze))] via-[hsl(var(--primary))] to-[hsl(var(--gold-warm))] rounded-full mx-auto mb-4"></div>
-          <p className="text-lg text-muted-foreground">
-            Acesse sua conta no Apostolado
-          </p>
+          <p className="text-lg text-muted-foreground">Bem-vindo de volta!</p>
         </div>
 
         <Card className="p-8 shadow-lg">
-          {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive">
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label
+                htmlFor="identifier"
+                className="block text-sm font-semibold text-foreground mb-2"
+              >
                 Email ou Nome de Usuário
               </label>
               <input
+                id="identifier"
                 type="text"
                 name="identifier"
-                value={formData.identifier}
+                value={credentials.identifier}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -77,13 +81,17 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-semibold text-foreground mb-2"
+              >
                 Senha
               </label>
               <input
+                id="password"
                 type="password"
                 name="password"
-                value={formData.password}
+                value={credentials.password}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -101,7 +109,10 @@ export default function Login() {
 
             <p className="text-center text-sm text-muted-foreground">
               Não tem uma conta?{' '}
-              <Link to="/registro" className="text-primary font-semibold hover:underline">
+              <Link
+                to="/registro"
+                className="text-primary font-semibold hover:underline"
+              >
                 Criar Conta
               </Link>
             </p>

@@ -1,53 +1,39 @@
+// Caminho do arquivo: src/middlewares/rate-limit.js
+
+'use strict';
+
 const rateLimit = require('koa-ratelimit');
+const { RateLimitError } = require('@strapi/utils').errors;
 
-/**
- * Middleware de Rate Limiting para proteção contra brute force
- * Limita requisições por IP para endpoints sensíveis
- */
-module.exports = (config, { strapi }) => {
-  // Criar store em memória para rate limiting
-  const db = new Map();
-
+module.exports = (config) => {
   return async (ctx, next) => {
-    // Aplicar rate limiting apenas em rotas de autenticação
-    const authRoutes = [
-      '/api/auth/local',
-      '/api/auth/local/register',
-      '/api/auth/forgot-password',
-      '/api/auth/reset-password'
-    ];
+    const limiter = rateLimit({
+      driver: 'memory',
+      db: new Map(),
+      duration: config.duration || 60000, // 1 minuto
+      errorMessage: 'Too many requests, please try again later.',
+      id: (context) => context.ip,
+      headers: {
+        remaining: 'Rate-Limit-Remaining',
+        reset: 'Rate-Limit-Reset',
+        total: 'Rate-Limit-Total',
+      },
+      max: config.max || 5,
+      disableHeader: false,
+      throw: true,
+    });
 
-    const isAuthRoute = authRoutes.some(route => ctx.path.startsWith(route));
-
-    if (isAuthRoute) {
-      // Configuração de rate limiting
-      const limiter = rateLimit({
-        driver: 'memory',
-        db: db,
-        duration: 60000 * 15, // 15 minutos
-        errorMessage: 'Muitas tentativas. Tente novamente em 15 minutos.',
-        id: (ctx) => ctx.ip,
-        headers: {
-          remaining: 'Rate-Limit-Remaining',
-          reset: 'Rate-Limit-Reset',
-          total: 'Rate-Limit-Total'
-        },
-        max: 5, // Máximo de 5 tentativas por IP a cada 15 minutos
-        disableHeader: false,
-        whitelist: (ctx) => {
-          // Whitelist para IPs confiáveis (ex: localhost)
-          return false;
-        },
-        blacklist: (ctx) => {
-          // Blacklist para IPs bloqueados
-          return false;
-        }
-      });
-
-      await limiter(ctx, next);
-    } else {
-      // Não aplicar rate limiting para outras rotas
+    try {
+      await limiter(ctx);
       await next();
+    } catch (error) {
+      if (error.status === 429) {
+        throw new RateLimitError(error.message, {
+          remaining: error.headers['Rate-Limit-Remaining'],
+          reset: error.headers['Rate-Limit-Reset'],
+        });
+      }
+      throw error;
     }
   };
 };

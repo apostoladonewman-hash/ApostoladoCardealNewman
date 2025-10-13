@@ -80,8 +80,8 @@ export const newmanService = {
   async get(): Promise<Newman> {
     const { data } = await api.get<NewmanResponse>('/newman', {
       params: {
-        populate: 'photo'
-      }
+        populate: 'photo',
+      },
     });
 
     return {
@@ -103,7 +103,7 @@ export const newmanService = {
       photo: data.data.photo,
       works: data.data.works || [],
       quotes: data.data.quotes || [],
-      categories: data.data.categories || []
+      categories: data.data.categories || [],
     };
   },
 };

@@ -1,55 +1,43 @@
-# ==================================
-# BACKEND DOCKERFILE
-# Multi-stage build for Strapi
-# ==================================
+# Estágio de Build - Use Node.js v20, que é a versão LTS mais recente e compatível
+FROM node:20-alpine AS build
 
-# Stage 1: Build
-FROM node:20-alpine AS builder
-
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copiar os arquivos de dependências
+COPY package.json ./
+COPY package-lock.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Instalar dependências (usando --omit=dev, o novo padrão)
+RUN npm ci --omit=dev
 
-# Copy application files
+# Copiar o restante dos arquivos da aplicação
 COPY . .
 
-# Build Strapi admin panel
+# Construir a aplicação Strapi
 RUN npm run build
 
-# ==================================
-# Stage 2: Production
+# Estágio de Produção - Use a mesma versão do Node.js
 FROM node:20-alpine
 
+# Definir o diretório de trabalho
 WORKDIR /app
 
-# Install production dependencies only
-COPY package*.json ./
-RUN npm ci --only=production
+# Copiar as dependências instaladas do estágio de build
+COPY --from=build /app/node_modules ./node_modules
 
-# Copy built application from builder
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/config ./config
-COPY --from=builder /app/database ./database
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/scripts ./scripts
+# Copiar a aplicação construída do estágio de build
+COPY --from=build /app ./
 
-# Create directories for uploads and logs
-RUN mkdir -p /app/public/uploads /app/logs
+# Copiar o script de entrypoint e dar permissão de execução
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Set environment variables
-ENV NODE_ENV=production
-
-# Expose port
+# Expor a porta que o Strapi usa
 EXPOSE 1337
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:1337/api/health/live', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Definir o entrypoint que rodará as migrações antes de iniciar
+ENTRYPOINT ["docker-entrypoint.sh"]
 
-# Start application
+# Comando padrão para iniciar a aplicação
 CMD ["npm", "start"]

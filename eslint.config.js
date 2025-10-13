@@ -1,13 +1,14 @@
-// eslint.config.js
 import globals from 'globals';
 import pluginJs from '@eslint/js';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import prettierPlugin from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
 
 export default [
-  // Ignora diretórios que não devem ser analisados
+  // 1. Configurações Globais
   {
     ignores: [
       'node_modules/',
@@ -15,56 +16,94 @@ export default [
       'dist/',
       '.strapi/',
       '.tmp/',
-      'data/',
-      'scripts/',
+      'public/uploads/',
+      'frontend/dist/',
+      '**/*.d.ts',
     ],
   },
 
-  // Configurações recomendadas do ESLint
-  pluginJs.configs.recommended,
-
-  // Configuração do Prettier (desativa regras do ESLint que conflitam com o Prettier)
+  // 2. Configuração Padrão do Prettier (desativa regras conflitantes)
   prettierConfig,
 
-  // Configuração principal para arquivos JavaScript e JSX
+  // ================================================================\
+  // 3. CONFIGURAÇÃO PARA O BACKEND (Strapi - Arquivos .js em CommonJS)\
+  // ================================================================\
   {
-    files: ['**/*.{js,jsx}'],
+    files: [
+      'config/**/*.js',
+      'src/**/*.js',
+      'database/**/*.js',
+      'scripts/**/*.js',
+    ],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+      },
+    },
     plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      ...pluginJs.configs.recommended.rules,
+      'prettier/prettier': 'error',
+    },
+  },
+
+  // ================================================================\
+  // 4. CONFIGURAÇÃO PARA O FRONTEND (React + TypeScript)\
+  // ================================================================\
+  {
+    files: ['frontend/src/**/*.{ts,tsx}'], // Apenas para o código-fonte da aplicação
+    plugins: {
+      '@typescript-eslint': tseslint,
       react: pluginReact,
       'react-hooks': pluginReactHooks,
       prettier: prettierPlugin,
     },
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
+        project: './frontend/tsconfig.json',
       },
       globals: {
         ...globals.browser,
-        ...globals.node,
       },
     },
     rules: {
-      // Regras recomendadas do plugin do React
+      ...tseslint.configs.recommended.rules,
       ...pluginReact.configs.recommended.rules,
-
-      // Regras do React Hooks (adicionadas manualmente, como é o correto)
+      ...pluginReact.configs['jsx-runtime'].rules,
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-
-      // Ativa a regra do Prettier para mostrar erros de formatação
       'prettier/prettier': 'error',
-
-      // Nossas regras customizadas e sobrescritas
-      'react/react-in-jsx-scope': 'off', // Não é necessário com o novo JSX transform
-      'react/prop-types': 'warn', // Avisa sobre a falta de prop-types, mas não quebra o build
-      'no-unused-vars': 'warn', // Avisa sobre variáveis não utilizadas
+      'react/prop-types': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
-    settings: {
-      react: {
-        version: 'detect', // Detecta a versão do React automaticamente
+  },
+
+  // ================================================================\
+  // 5. NOVA CONFIGURAÇÃO: Arquivos TS de configuração do Frontend (Vite)\
+  // ================================================================\
+  {
+    files: ['frontend/vite.config.ts'], // Alvo específico
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: './frontend/tsconfig.node.json', // Usa o tsconfig correto para o ambiente Node
       },
+      globals: {
+        ...globals.node,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      prettier: prettierPlugin,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      'prettier/prettier': 'error',
     },
   },
 ];

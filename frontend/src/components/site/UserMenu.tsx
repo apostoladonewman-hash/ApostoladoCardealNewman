@@ -43,7 +43,10 @@ export default function UserMenu() {
 
     // Caso 2: Objeto único com data.url (formato Strapi v4+)
     if (user.foto_perfil.data) {
-      if (Array.isArray(user.foto_perfil.data) && user.foto_perfil.data.length > 0) {
+      if (
+        Array.isArray(user.foto_perfil.data) &&
+        user.foto_perfil.data.length > 0
+      ) {
         return `http://localhost:1337${user.foto_perfil.data[0].attributes.url}`;
       }
       if (user.foto_perfil.data.attributes?.url) {
@@ -66,7 +69,8 @@ export default function UserMenu() {
 
   const avatarUrl = getAvatarUrl();
   const userLevel = user.userLevel || 'Usuário';
-  const isModerador = userLevel === 'Moderador' || userLevel === 'Administrador';
+  const isModerador =
+    userLevel === 'Moderador' || userLevel === 'Administrador';
   const isAdmin = userLevel === 'Administrador';
 
   return (
@@ -97,8 +101,12 @@ export default function UserMenu() {
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="font-semibold">{user.username}</span>
-            <span className="text-xs text-muted-foreground font-normal">{user.email}</span>
-            <span className="text-xs text-primary font-medium mt-1">{userLevel}</span>
+            <span className="text-xs text-muted-foreground font-normal">
+              {user.email}
+            </span>
+            <span className="text-xs text-primary font-medium mt-1">
+              {userLevel}
+            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -111,21 +119,30 @@ export default function UserMenu() {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link to="/meu-testemunho" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            to="/meu-testemunho"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <BookOpen className="w-4 h-4" />
             <span>Meu Testemunho</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link to="/submeter-artigo" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            to="/submeter-artigo"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <FileText className="w-4 h-4" />
             <span>Submeter Artigo</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link to="/meus-artigos" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            to="/meus-artigos"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <FolderOpen className="w-4 h-4" />
             <span>Meus Artigos</span>
           </Link>
@@ -135,7 +152,10 @@ export default function UserMenu() {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/moderacao" className="flex items-center gap-2 cursor-pointer">
+              <Link
+                to="/moderacao"
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <Shield className="w-4 h-4" />
                 <span>Moderação</span>
               </Link>
@@ -145,7 +165,10 @@ export default function UserMenu() {
 
         {isAdmin && (
           <DropdownMenuItem asChild>
-            <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Settings className="w-4 h-4" />
               <span>Administração</span>
             </Link>
